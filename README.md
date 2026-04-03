@@ -36,10 +36,10 @@ React 18 · TypeScript · Vite · No UI libraries
 
 ## Run locally
 
-\`\`\`bash
+```bash
 npm install
 npm run dev
-\`\`\`
+```
 
 ## Why I built this
 
