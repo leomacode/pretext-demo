@@ -1,3 +1,4 @@
+import { MsgBubble } from "./MsgBubble";
 import { T } from "../theme";
 import type { BenchmarkResult, Message } from "../types";
 
@@ -135,84 +136,17 @@ export function PerfPane({
 
       {/* Bubble list */}
       <div style={{ flex: 1, overflowY: "auto", padding: "8px 0" }}>
-        {messages.map((msg, i) => {
-          const isUser = msg.role === "user";
-          return (
-            <div
-              key={msg.id}
-              style={{
-                display: "flex",
-                justifyContent: isUser ? "flex-end" : "flex-start",
-                padding: "3px 12px",
-                background: showFlash ? `${color}06` : "transparent",
-                transition: "background 0.3s",
-              }}
-            >
-              <div
-                style={{
-                  maxWidth: "82%",
-                  borderRadius: isUser
-                    ? "10px 10px 2px 10px"
-                    : "10px 10px 10px 2px",
-                  padding: "5px 10px",
-                  background: isUser ? `${color}10` : T.fill25,
-                  border: `1px solid ${isUser ? color + "22" : T.fill6}`,
-                  position: "relative",
-                }}
-              >
-                {showFlash && (
-                  <div
-                    style={{
-                      position: "absolute",
-                      inset: 0,
-                      borderRadius: "inherit",
-                      background: `${color}15`,
-                      animation: `benchFlash ${0.05 + (i % 5) * 0.02}s ease infinite alternate`,
-                    }}
-                  />
-                )}
-                <div
-                  style={{
-                    fontSize: 15,
-                    color: T.text77,
-                    marginBottom: 2,
-                    fontFamily: T.fontMono,
-                  }}
-                >
-                  {isUser ? "YOU" : "AI"} ·{" "}
-                  {msg.timestamp.toLocaleTimeString([], {
-                    hour: "2-digit",
-                    minute: "2-digit",
-                  })}
-                </div>
-                <div
-                  style={{
-                    fontSize: 14,
-                    lineHeight: "18px",
-                    color: isUser ? "#d0ffd0" : "#909090",
-                    fontFamily: T.fontMono,
-                    whiteSpace: "pre-wrap",
-                    wordBreak: "break-word",
-                  }}
-                >
-                  {msg.text}
-                </div>
-                {result && bubbleFooter && (
-                  <div
-                    style={{
-                      marginTop: 3,
-                      fontSize: 15,
-                      color: color + "66",
-                      fontFamily: T.fontMono,
-                    }}
-                  >
-                    {bubbleFooter}
-                  </div>
-                )}
-              </div>
-            </div>
-          );
-        })}
+        {messages.map((msg, i) => (
+          <MsgBubble
+            key={msg.id}
+            msg={msg}
+            color={color}
+            dense
+            rowFlash={showFlash}
+            flashIndex={showFlash ? i : undefined}
+            footer={result && bubbleFooter ? bubbleFooter : undefined}
+          />
+        ))}
       </div>
     </div>
   );
