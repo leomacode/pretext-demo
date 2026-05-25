@@ -1,6 +1,7 @@
 import { useCallback, useState } from "react";
 import { runRealBenchmark } from "../benchmark";
 import { generateMessages } from "../data";
+import { T } from "../theme";
 import type { BenchmarkResult, Message } from "../types";
 
 interface PerfTabProps {
@@ -50,8 +51,8 @@ export function PerfTab({ messages, appWidth, L, R }: PerfTabProps) {
           <div
             style={{
               fontSize: 14,
-              color: "#ffffffaa",
-              fontFamily: "system-ui,sans-serif",
+              color: T.textaa,
+              fontFamily: T.fontSans,
               lineHeight: 1.5,
             }}
           >
@@ -91,7 +92,7 @@ export function PerfTab({ messages, appWidth, L, R }: PerfTabProps) {
                   style={{
                     fontSize: 15,
                     fontWeight: 400,
-                    color: "#ffffffcc",
+                    color: T.textcc,
                     marginLeft: 3,
                   }}
                 >
@@ -101,8 +102,8 @@ export function PerfTab({ messages, appWidth, L, R }: PerfTabProps) {
               <div
                 style={{
                   fontSize: 15,
-                  color: "#ffffffcc",
-                  fontFamily: "system-ui,sans-serif",
+                  color: T.textcc,
+                  fontFamily: T.fontSans,
                 }}
               >
                 to measure {perfResult.msgCount} messages
@@ -111,7 +112,7 @@ export function PerfTab({ messages, appWidth, L, R }: PerfTabProps) {
             <div
               style={{
                 height: 4,
-                background: "rgba(255,255,255,0.05)",
+                background: T.line5,
                 borderRadius: 2,
                 marginBottom: 6,
               }}
@@ -129,8 +130,8 @@ export function PerfTab({ messages, appWidth, L, R }: PerfTabProps) {
             <div
               style={{
                 fontSize: 14,
-                color: "#ffffffbb",
-                fontFamily: "system-ui,sans-serif",
+                color: T.textbb,
+                fontFamily: T.fontSans,
                 lineHeight: 1.7,
               }}
             >
@@ -171,8 +172,8 @@ export function PerfTab({ messages, appWidth, L, R }: PerfTabProps) {
                       ? "10px 10px 2px 10px"
                       : "10px 10px 10px 2px",
                     padding: "5px 10px",
-                    background: isUser ? `${L}10` : "rgba(255,255,255,0.025)",
-                    border: `1px solid ${isUser ? L + "22" : "rgba(255,255,255,0.06)"}`,
+                    background: isUser ? `${L}10` : T.fill25,
+                    border: `1px solid ${isUser ? L + "22" : T.fill6}`,
                     position: "relative",
                   }}
                 >
@@ -190,9 +191,9 @@ export function PerfTab({ messages, appWidth, L, R }: PerfTabProps) {
                   <div
                     style={{
                       fontSize: 15,
-                      color: "#ffffff77",
+                      color: T.text77,
                       marginBottom: 2,
-                      fontFamily: "'IBM Plex Mono',monospace",
+                      fontFamily: T.fontMono,
                     }}
                   >
                     {isUser ? "YOU" : "AI"} ·{" "}
@@ -206,7 +207,7 @@ export function PerfTab({ messages, appWidth, L, R }: PerfTabProps) {
                       fontSize: 14,
                       lineHeight: "18px",
                       color: isUser ? "#d0ffd0" : "#909090",
-                      fontFamily: "'IBM Plex Mono',monospace",
+                      fontFamily: T.fontMono,
                       whiteSpace: "pre-wrap",
                       wordBreak: "break-word",
                     }}
@@ -219,7 +220,7 @@ export function PerfTab({ messages, appWidth, L, R }: PerfTabProps) {
                         marginTop: 3,
                         fontSize: 15,
                         color: L + "66",
-                        fontFamily: "'IBM Plex Mono',monospace",
+                        fontFamily: T.fontMono,
                       }}
                     >
                       ← measured via DOM reflow
@@ -239,7 +240,7 @@ export function PerfTab({ messages, appWidth, L, R }: PerfTabProps) {
           flexDirection: "column",
           alignItems: "center",
           paddingTop: 10,
-          background: "rgba(0,0,0,0.2)",
+          background: T.surface,
           borderLeft: "1px solid rgba(255,255,255,0.07)",
           borderRight: "1px solid rgba(255,255,255,0.07)",
         }}
@@ -262,14 +263,14 @@ export function PerfTab({ messages, appWidth, L, R }: PerfTabProps) {
                 flex: 1,
                 padding: "4px 0",
                 fontSize: 12,
-                fontFamily: "'IBM Plex Mono',monospace",
+                fontFamily: T.fontMono,
                 background:
                   perfSize === n
-                    ? "rgba(255,255,255,0.15)"
-                    : "rgba(255,255,255,0.04)",
-                border: `1px solid ${perfSize === n ? "rgba(255,255,255,0.4)" : "rgba(255,255,255,0.1)"}`,
+                    ? T.fill15
+                    : T.fill4,
+                border: `1px solid ${perfSize === n ? T.fill40 : T.fill10}`,
                 borderRadius: 4,
-                color: perfSize === n ? "#fff" : "#ffffff88",
+                color: perfSize === n ? "#fff" : T.text88,
                 cursor: perfRunning ? "not-allowed" : "pointer",
               }}
             >
@@ -284,14 +285,14 @@ export function PerfTab({ messages, appWidth, L, R }: PerfTabProps) {
             width: 110,
             padding: "10px 0",
             fontSize: 15,
-            fontFamily: "system-ui,sans-serif",
+            fontFamily: T.fontSans,
             fontWeight: 600,
             background: perfRunning
-              ? "rgba(255,255,255,0.04)"
-              : "rgba(255,255,255,0.08)",
+              ? T.fill4
+              : T.fill8,
             border: "1px solid rgba(255,255,255,0.2)",
             borderRadius: 8,
-            color: perfRunning ? "#ffffffaa" : "#ffffff99",
+            color: perfRunning ? T.textaa : T.text99,
             cursor: perfRunning ? "not-allowed" : "pointer",
             textAlign: "center",
             lineHeight: 1.5,
@@ -308,9 +309,9 @@ export function PerfTab({ messages, appWidth, L, R }: PerfTabProps) {
           style={{
             marginTop: 8,
             fontSize: 13,
-            color: "#ffffff55",
+            color: T.text55,
             textAlign: "center",
-            fontFamily: "system-ui,sans-serif",
+            fontFamily: T.fontSans,
             lineHeight: 1.5,
             width: 90,
           }}
@@ -337,8 +338,8 @@ export function PerfTab({ messages, appWidth, L, R }: PerfTabProps) {
           <div
             style={{
               fontSize: 14,
-              color: "#ffffffaa",
-              fontFamily: "system-ui,sans-serif",
+              color: T.textaa,
+              fontFamily: T.fontSans,
               lineHeight: 1.5,
             }}
           >
@@ -378,7 +379,7 @@ export function PerfTab({ messages, appWidth, L, R }: PerfTabProps) {
                   style={{
                     fontSize: 15,
                     fontWeight: 400,
-                    color: "#ffffffcc",
+                    color: T.textcc,
                     marginLeft: 3,
                   }}
                 >
@@ -394,7 +395,7 @@ export function PerfTab({ messages, appWidth, L, R }: PerfTabProps) {
                   fontSize: 14,
                   fontWeight: 700,
                   color: R,
-                  fontFamily: "system-ui,sans-serif",
+                  fontFamily: T.fontSans,
                 }}
               >
                 {perfResult.ratio}× faster
@@ -403,7 +404,7 @@ export function PerfTab({ messages, appWidth, L, R }: PerfTabProps) {
             <div
               style={{
                 height: 4,
-                background: "rgba(255,255,255,0.05)",
+                background: T.line5,
                 borderRadius: 2,
                 marginBottom: 6,
               }}
@@ -422,8 +423,8 @@ export function PerfTab({ messages, appWidth, L, R }: PerfTabProps) {
             <div
               style={{
                 fontSize: 14,
-                color: "#ffffffbb",
-                fontFamily: "system-ui,sans-serif",
+                color: T.textbb,
+                fontFamily: T.fontSans,
                 lineHeight: 1.7,
               }}
             >
@@ -451,16 +452,16 @@ export function PerfTab({ messages, appWidth, L, R }: PerfTabProps) {
                       ? "10px 10px 2px 10px"
                       : "10px 10px 10px 2px",
                     padding: "5px 10px",
-                    background: isUser ? `${R}08` : "rgba(255,255,255,0.025)",
-                    border: `1px solid ${isUser ? R + "20" : "rgba(255,255,255,0.06)"}`,
+                    background: isUser ? `${R}08` : T.fill25,
+                    border: `1px solid ${isUser ? R + "20" : T.fill6}`,
                   }}
                 >
                   <div
                     style={{
                       fontSize: 15,
-                      color: "#ffffff77",
+                      color: T.text77,
                       marginBottom: 2,
-                      fontFamily: "'IBM Plex Mono',monospace",
+                      fontFamily: T.fontMono,
                     }}
                   >
                     {isUser ? "YOU" : "AI"} ·{" "}
@@ -474,7 +475,7 @@ export function PerfTab({ messages, appWidth, L, R }: PerfTabProps) {
                       fontSize: 14,
                       lineHeight: "18px",
                       color: isUser ? "#d0ffd0" : "#909090",
-                      fontFamily: "'IBM Plex Mono',monospace",
+                      fontFamily: T.fontMono,
                       whiteSpace: "pre-wrap",
                       wordBreak: "break-word",
                     }}
@@ -487,7 +488,7 @@ export function PerfTab({ messages, appWidth, L, R }: PerfTabProps) {
                         marginTop: 3,
                         fontSize: 15,
                         color: R + "66",
-                        fontFamily: "'IBM Plex Mono',monospace",
+                        fontFamily: T.fontMono,
                       }}
                     >
                       ← height from Canvas math, no DOM needed

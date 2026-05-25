@@ -1,3 +1,4 @@
+import { T } from "../theme";
 import type { Message } from "../types";
 
 interface MsgBubbleProps {
@@ -28,17 +29,17 @@ export function MsgBubble({ msg, color, highlight }: MsgBubbleProps) {
               : `${color}14`
             : isUser
               ? `${color}10`
-              : "rgba(255,255,255,0.03)",
-          border: `1px solid ${isUser ? color + (highlight ? "55" : "28") : "rgba(255,255,255,0.07)"}`,
+              : T.fill1,
+          border: `1px solid ${isUser ? color + (highlight ? "55" : "28") : T.line}`,
           transition: "background 0.3s, border 0.3s",
         }}
       >
         <div
           style={{
             fontSize: 15,
-            color: "#ffffff99",
+            color: T.text99,
             marginBottom: 3,
-            fontFamily: "'IBM Plex Mono',monospace",
+            fontFamily: T.fontMono,
           }}
         >
           {isUser ? "YOU" : "AI"} ·{" "}
@@ -52,7 +53,7 @@ export function MsgBubble({ msg, color, highlight }: MsgBubbleProps) {
             fontSize: 14,
             lineHeight: "24px",
             color: isUser ? "#dfffda" : "#a8a8b8",
-            fontFamily: "'IBM Plex Mono',monospace",
+            fontFamily: T.fontMono,
             whiteSpace: "pre-wrap",
             wordBreak: "break-word",
           }}

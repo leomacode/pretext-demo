@@ -1,3 +1,5 @@
+import { T } from "../theme";
+
 interface ColHeaderProps {
   label: string;
   color: string;
@@ -31,7 +33,7 @@ export function ColHeader({ label, color, tag, sub }: ColHeaderProps) {
             fontWeight: 700,
             color,
             letterSpacing: "0.12em",
-            fontFamily: "'IBM Plex Mono',monospace",
+            fontFamily: T.fontMono,
           }}
         >
           {label}
@@ -44,7 +46,7 @@ export function ColHeader({ label, color, tag, sub }: ColHeaderProps) {
             background: `${color}18`,
             border: `1px solid ${color}33`,
             color: color + "bb",
-            fontFamily: "'IBM Plex Mono',monospace",
+            fontFamily: T.fontMono,
           }}
         >
           {tag}
@@ -53,9 +55,9 @@ export function ColHeader({ label, color, tag, sub }: ColHeaderProps) {
       <div
         style={{
           fontSize: 15,
-          color: "#ffffffaa",
+          color: T.textaa,
           marginTop: 2,
-          fontFamily: "system-ui,sans-serif",
+          fontFamily: T.fontSans,
         }}
       >
         {sub}

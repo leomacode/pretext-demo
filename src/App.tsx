@@ -1,9 +1,10 @@
 import { useEffect, useRef, useState } from "react";
 import { ColHeader } from "./components/ColHeader";
-import { COLORS, SCROLL_MESSAGES, generateMessages } from "./data";
+import { SCROLL_MESSAGES, generateMessages } from "./data";
 import { HeightCalcTab } from "./tabs/HeightCalcTab";
 import { PerfTab } from "./tabs/PerfTab";
 import { StreamTab } from "./tabs/StreamTab";
+import { T } from "./theme";
 import type { Message } from "./types";
 
 type TabId = "scroll" | "stream" | "perf";
@@ -27,7 +28,7 @@ export default function App() {
     return () => ro.disconnect();
   }, []);
 
-  const { L, R } = COLORS;
+  const { L, R } = T;
 
   return (
     <div
@@ -35,27 +36,13 @@ export default function App() {
       style={{
         height: "100vh",
         width: "100%",
-        background: "#07070e",
+        background: T.bgApp,
         display: "flex",
         flexDirection: "column",
-        fontFamily: "'IBM Plex Mono',monospace",
+        fontFamily: T.fontMono,
         overflow: "hidden",
       }}
     >
-      <link
-        href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500;700&display=swap"
-        rel="stylesheet"
-      />
-      <style>{`
-        *{box-sizing:border-box}
-        ::-webkit-scrollbar{width:3px}
-        ::-webkit-scrollbar-thumb{background:#ffffff15;border-radius:2px}
-        @keyframes blink{0%,100%{opacity:1}50%{opacity:0}}
-        @keyframes slideUp{from{opacity:0;transform:translateY(6px)}to{opacity:1;transform:translateY(0)}}
-        @keyframes bounceUp{0%,100%{transform:translateY(0)}50%{transform:translateY(-5px)}}
-        @keyframes benchFlash{0%{opacity:0.2}100%{opacity:0.5}}
-      `}</style>
-
       {/* TOP BAR */}
       <div
         style={{
@@ -64,7 +51,7 @@ export default function App() {
           display: "flex",
           alignItems: "center",
           justifyContent: "space-between",
-          background: "rgba(0,0,0,0.7)",
+          background: T.bgBar,
           backdropFilter: "blur(12px)",
           flexShrink: 0,
         }}
@@ -103,8 +90,8 @@ export default function App() {
           <span
             style={{
               fontSize: 14,
-              color: "#ffffff66",
-              fontFamily: "system-ui,sans-serif",
+              color: T.text66,
+              fontFamily: T.fontSans,
             }}
           >
             A new library for fast text layout · @chenglou/pretext
@@ -118,11 +105,11 @@ export default function App() {
               style={{
                 padding: "5px 12px",
                 fontSize: 14,
-                fontFamily: "system-ui,sans-serif",
+                fontFamily: T.fontSans,
                 background: "none",
                 border: "none",
                 cursor: "pointer",
-                color: tab === t.id ? "#fff" : "#ffffffbb",
+                color: tab === t.id ? "#fff" : T.textbb,
                 borderBottom:
                   tab === t.id
                     ? "1px solid #ffffff70"
@@ -151,7 +138,7 @@ export default function App() {
             tag="old approach"
             sub="Browser has to pause and re-measure the page on every calculation"
           />
-          <div style={{ background: "rgba(255,255,255,0.07)" }} />
+          <div style={{ background: T.line }} />
           <ColHeader
             label="WITH PRETEXT"
             color={R}

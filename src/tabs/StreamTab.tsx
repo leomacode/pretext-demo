@@ -1,5 +1,6 @@
 import { useCallback, useState } from "react";
 import { useStream } from "../hooks/useStream";
+import { T } from "../theme";
 
 interface StreamTabProps {
   appWidth: number;
@@ -40,8 +41,8 @@ export function StreamTab({ appWidth, L, R }: StreamTabProps) {
           <div
             style={{
               fontSize: 14,
-              color: "#ffffffaa",
-              fontFamily: "system-ui,sans-serif",
+              color: T.textaa,
+              fontFamily: T.fontSans,
             }}
           >
             No height prediction — bubble grows word by word.
@@ -51,10 +52,10 @@ export function StreamTab({ appWidth, L, R }: StreamTabProps) {
           <div
             style={{
               fontSize: 15,
-              color: "#ffffffaa",
+              color: T.textaa,
               marginBottom: 10,
               lineHeight: 1.6,
-              fontFamily: "system-ui,sans-serif",
+              fontFamily: T.fontSans,
             }}
           >
             The bubble grows word by word. Every new line pushes everything
@@ -66,16 +67,16 @@ export function StreamTab({ appWidth, L, R }: StreamTabProps) {
                 style={{
                   borderRadius: "10px 10px 10px 2px",
                   padding: "8px 12px",
-                  background: "rgba(255,255,255,0.03)",
+                  background: T.fill1,
                   border: "1px solid rgba(255,255,255,0.07)",
                 }}
               >
                 <div
                   style={{
                     fontSize: 15,
-                    color: "#ffffff99",
+                    color: T.text99,
                     marginBottom: 4,
-                    fontFamily: "system-ui,sans-serif",
+                    fontFamily: T.fontSans,
                   }}
                 >
                   AI · height changes on every new line
@@ -85,7 +86,7 @@ export function StreamTab({ appWidth, L, R }: StreamTabProps) {
                     fontSize: 15,
                     lineHeight: "24px",
                     color: "#a0a0b0",
-                    fontFamily: "'IBM Plex Mono',monospace",
+                    fontFamily: T.fontMono,
                     whiteSpace: "pre-wrap",
                     wordBreak: "break-word",
                   }}
@@ -131,15 +132,15 @@ export function StreamTab({ appWidth, L, R }: StreamTabProps) {
                     flex: 1,
                     padding: "8px 12px",
                     background:
-                      leftShifts === 0 ? "rgba(255,255,255,0.03)" : `${L}10`,
-                    border: `1px solid ${leftShifts === 0 ? "rgba(255,255,255,0.07)" : L + "40"}`,
+                      leftShifts === 0 ? T.fill1 : `${L}10`,
+                    border: `1px solid ${leftShifts === 0 ? T.line : L + "40"}`,
                     borderRadius: 8,
-                    fontFamily: "system-ui,sans-serif",
+                    fontFamily: T.fontSans,
                     transition: "all 0.2s",
                   }}
                 >
                   {leftShifts === 0 ? (
-                    <div style={{ fontSize: 15, color: "#ffffffaa" }}>
+                    <div style={{ fontSize: 15, color: T.textaa }}>
                       Waiting for first jump…
                     </div>
                   ) : (
@@ -152,7 +153,7 @@ export function StreamTab({ appWidth, L, R }: StreamTabProps) {
                       <div
                         style={{
                           fontSize: 14,
-                          color: "#ffffffcc",
+                          color: T.textcc,
                           marginTop: 2,
                         }}
                       >
@@ -173,7 +174,7 @@ export function StreamTab({ appWidth, L, R }: StreamTabProps) {
                     borderRadius: 8,
                     fontSize: 15,
                     color: L + "99",
-                    fontFamily: "system-ui,sans-serif",
+                    fontFamily: T.fontSans,
                     animation: "slideUp 0.3s ease",
                   }}
                 >
@@ -188,8 +189,8 @@ export function StreamTab({ appWidth, L, R }: StreamTabProps) {
             <div
               style={{
                 fontSize: 15,
-                color: "#ffffff77",
-                fontFamily: "system-ui,sans-serif",
+                color: T.text77,
+                fontFamily: T.fontSans,
               }}
             >
               Press the button in the middle to start.
@@ -205,7 +206,7 @@ export function StreamTab({ appWidth, L, R }: StreamTabProps) {
           flexDirection: "column",
           alignItems: "center",
           paddingTop: 10,
-          background: "rgba(0,0,0,0.2)",
+          background: T.surface,
           borderLeft: "1px solid rgba(255,255,255,0.07)",
           borderRight: "1px solid rgba(255,255,255,0.07)",
         }}
@@ -217,14 +218,14 @@ export function StreamTab({ appWidth, L, R }: StreamTabProps) {
             width: 110,
             padding: "10px 8px",
             fontSize: 15,
-            fontFamily: "system-ui,sans-serif",
+            fontFamily: T.fontSans,
             fontWeight: 600,
             background: running
-              ? "rgba(255,255,255,0.04)"
-              : "rgba(255,255,255,0.08)",
+              ? T.fill4
+              : T.fill8,
             border: "1px solid rgba(255,255,255,0.2)",
             borderRadius: 8,
-            color: running ? "#ffffffaa" : "#ffffff99",
+            color: running ? T.textaa : T.text99,
             cursor: running ? "not-allowed" : "pointer",
             textAlign: "center",
             lineHeight: 1.5,
@@ -241,9 +242,9 @@ export function StreamTab({ appWidth, L, R }: StreamTabProps) {
           style={{
             marginTop: 8,
             fontSize: 13,
-            color: "#ffffff55",
+            color: T.text55,
             textAlign: "center",
-            fontFamily: "system-ui,sans-serif",
+            fontFamily: T.fontSans,
             lineHeight: 1.5,
             width: 90,
           }}
@@ -269,8 +270,8 @@ export function StreamTab({ appWidth, L, R }: StreamTabProps) {
           <div
             style={{
               fontSize: 14,
-              color: "#ffffffaa",
-              fontFamily: "system-ui,sans-serif",
+              color: T.textaa,
+              fontFamily: T.fontSans,
             }}
           >
             Pretext locks the height before streaming starts.
@@ -280,10 +281,10 @@ export function StreamTab({ appWidth, L, R }: StreamTabProps) {
           <div
             style={{
               fontSize: 15,
-              color: "#ffffffaa",
+              color: T.textaa,
               marginBottom: 10,
               lineHeight: 1.6,
-              fontFamily: "system-ui,sans-serif",
+              fontFamily: T.fontSans,
             }}
           >
             The full space is reserved before the first word arrives. Nothing
@@ -295,7 +296,7 @@ export function StreamTab({ appWidth, L, R }: StreamTabProps) {
                 style={{
                   borderRadius: "10px 10px 10px 2px",
                   padding: "8px 12px",
-                  background: "rgba(255,255,255,0.03)",
+                  background: T.fill1,
                   border: `1px solid ${R}20`,
                   ...(rightStream.predictedH
                     ? { minHeight: rightStream.predictedH }
@@ -307,7 +308,7 @@ export function StreamTab({ appWidth, L, R }: StreamTabProps) {
                     fontSize: 15,
                     color: R + "60",
                     marginBottom: 4,
-                    fontFamily: "system-ui,sans-serif",
+                    fontFamily: T.fontSans,
                   }}
                 >
                   AI · space reserved: {rightStream.predictedH}px 🔒
@@ -317,7 +318,7 @@ export function StreamTab({ appWidth, L, R }: StreamTabProps) {
                     fontSize: 15,
                     lineHeight: "24px",
                     color: "#a0a0b0",
-                    fontFamily: "'IBM Plex Mono',monospace",
+                    fontFamily: T.fontMono,
                     whiteSpace: "pre-wrap",
                     wordBreak: "break-word",
                   }}
@@ -353,7 +354,7 @@ export function StreamTab({ appWidth, L, R }: StreamTabProps) {
                     background: `${R}08`,
                     border: `1px solid ${R}30`,
                     borderRadius: 8,
-                    fontFamily: "system-ui,sans-serif",
+                    fontFamily: T.fontSans,
                   }}
                 >
                   <div style={{ fontSize: 20, fontWeight: 700, color: R }}>
@@ -362,7 +363,7 @@ export function StreamTab({ appWidth, L, R }: StreamTabProps) {
                   <div
                     style={{
                       fontSize: 14,
-                      color: "#ffffffcc",
+                      color: T.textcc,
                       marginTop: 2,
                     }}
                   >
@@ -381,7 +382,7 @@ export function StreamTab({ appWidth, L, R }: StreamTabProps) {
                     borderRadius: 8,
                     fontSize: 15,
                     color: R + "99",
-                    fontFamily: "system-ui,sans-serif",
+                    fontFamily: T.fontSans,
                     animation: "slideUp 0.3s ease",
                   }}
                 >
@@ -395,8 +396,8 @@ export function StreamTab({ appWidth, L, R }: StreamTabProps) {
             <div
               style={{
                 fontSize: 15,
-                color: "#ffffff77",
-                fontFamily: "system-ui,sans-serif",
+                color: T.text77,
+                fontFamily: T.fontSans,
               }}
             >
               Waiting…

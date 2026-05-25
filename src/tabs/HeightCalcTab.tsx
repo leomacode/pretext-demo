@@ -1,6 +1,7 @@
 import { useCallback, useEffect, useRef, useState } from "react";
 import { pretextLayout, pretextPrepare, domMeasureHeight } from "../pretext";
 import { MsgBubble } from "../components/MsgBubble";
+import { T } from "../theme";
 import { FONT, type Message, type Phase } from "../types";
 
 interface HeightCalcTabProps {
@@ -114,15 +115,15 @@ export function HeightCalcTab({ messages, L, R }: HeightCalcTabProps) {
           <div
             style={{
               fontSize: 14,
-              color: "#ffffffbb",
-              fontFamily: "system-ui,sans-serif",
+              color: T.textbb,
+              fontFamily: T.fontSans,
             }}
           >
             {phase === "idle" && "Ready — press Load to start"}
             {phase === "running" && (
               <span style={{ color: L }}>
                 ⏳ Measuring message {leftVisible.length} of {messages.length}…
-                <span style={{ color: "#ffffffbb", marginLeft: 6 }}>
+                <span style={{ color: T.textbb, marginLeft: 6 }}>
                   each one pauses the page
                 </span>
               </span>
@@ -142,7 +143,7 @@ export function HeightCalcTab({ messages, L, R }: HeightCalcTabProps) {
                 border: `1px solid ${L}33`,
                 borderRadius: 6,
                 padding: "3px 10px",
-                fontFamily: "'IBM Plex Mono',monospace",
+                fontFamily: T.fontMono,
                 fontSize: 15,
                 color: L,
               }}
@@ -160,9 +161,9 @@ export function HeightCalcTab({ messages, L, R }: HeightCalcTabProps) {
               style={{
                 padding: "40px 20px",
                 textAlign: "center",
-                color: "#ffffff77",
+                color: T.text77,
                 fontSize: 15,
-                fontFamily: "system-ui,sans-serif",
+                fontFamily: T.fontSans,
                 lineHeight: 1.8,
               }}
             >
@@ -171,7 +172,7 @@ export function HeightCalcTab({ messages, L, R }: HeightCalcTabProps) {
               each message one by one.
               <br />
               <br />
-              <span style={{ color: "#ffffffaa" }}>
+              <span style={{ color: T.textaa }}>
                 Press "Load" to see it happen.
               </span>
             </div>
@@ -192,7 +193,7 @@ export function HeightCalcTab({ messages, L, R }: HeightCalcTabProps) {
                 background: `${L}0a`,
                 border: `1px solid ${L}25`,
                 borderRadius: 8,
-                fontFamily: "system-ui,sans-serif",
+                fontFamily: T.fontSans,
                 fontSize: 15,
                 color: L + "99",
                 animation: "slideUp 0.3s ease",
@@ -213,7 +214,7 @@ export function HeightCalcTab({ messages, L, R }: HeightCalcTabProps) {
           flexDirection: "column",
           alignItems: "center",
           paddingTop: 10,
-          background: "rgba(0,0,0,0.2)",
+          background: T.surface,
           borderRight: "1px solid rgba(255,255,255,0.07)",
         }}
       >
@@ -224,15 +225,15 @@ export function HeightCalcTab({ messages, L, R }: HeightCalcTabProps) {
             width: 110,
             padding: "10px 0",
             fontSize: 15,
-            fontFamily: "system-ui,sans-serif",
+            fontFamily: T.fontSans,
             fontWeight: 600,
             background:
               phase === "running"
-                ? "rgba(255,255,255,0.03)"
-                : "rgba(255,255,255,0.08)",
+                ? T.fill1
+                : T.fill8,
             border: "1px solid rgba(255,255,255,0.2)",
             borderRadius: 8,
-            color: phase === "running" ? "#ffffff77" : "#ffffff88",
+            color: phase === "running" ? T.text77 : T.text88,
             cursor: phase === "running" ? "not-allowed" : "pointer",
             textAlign: "center",
             lineHeight: 1.5,
@@ -255,9 +256,9 @@ export function HeightCalcTab({ messages, L, R }: HeightCalcTabProps) {
           style={{
             marginTop: 8,
             fontSize: 15,
-            color: "#ffffffcc",
+            color: T.textcc,
             textAlign: "center",
-            fontFamily: "system-ui,sans-serif",
+            fontFamily: T.fontSans,
             lineHeight: 1.5,
             width: 90,
           }}
@@ -284,7 +285,7 @@ export function HeightCalcTab({ messages, L, R }: HeightCalcTabProps) {
                 fontSize: 20,
                 fontWeight: 700,
                 color: "#00ff9d",
-                fontFamily: "'IBM Plex Mono',monospace",
+                fontFamily: T.fontMono,
               }}
             >
               {(leftMs / Math.max(rightMs, 0.01)).toFixed(0)}×
@@ -292,8 +293,8 @@ export function HeightCalcTab({ messages, L, R }: HeightCalcTabProps) {
             <div
               style={{
                 fontSize: 15,
-                color: "#ffffffcc",
-                fontFamily: "system-ui,sans-serif",
+                color: T.textcc,
+                fontFamily: T.fontSans,
                 marginTop: 2,
               }}
             >
@@ -320,8 +321,8 @@ export function HeightCalcTab({ messages, L, R }: HeightCalcTabProps) {
           <div
             style={{
               fontSize: 14,
-              color: "#ffffffbb",
-              fontFamily: "system-ui,sans-serif",
+              color: T.textbb,
+              fontFamily: T.fontSans,
             }}
           >
             {phase === "idle" && "Ready — Pretext will load instantly"}
@@ -349,7 +350,7 @@ export function HeightCalcTab({ messages, L, R }: HeightCalcTabProps) {
                 border: `1px solid ${R}33`,
                 borderRadius: 6,
                 padding: "3px 10px",
-                fontFamily: "'IBM Plex Mono',monospace",
+                fontFamily: T.fontMono,
                 fontSize: 15,
                 color: R,
               }}
@@ -364,9 +365,9 @@ export function HeightCalcTab({ messages, L, R }: HeightCalcTabProps) {
               style={{
                 padding: "40px 20px",
                 textAlign: "center",
-                color: "#ffffff77",
+                color: T.text77,
                 fontSize: 15,
-                fontFamily: "system-ui,sans-serif",
+                fontFamily: T.fontSans,
                 lineHeight: 1.8,
               }}
             >
@@ -375,7 +376,7 @@ export function HeightCalcTab({ messages, L, R }: HeightCalcTabProps) {
               then calculates every height with pure math.
               <br />
               <br />
-              <span style={{ color: "#ffffffaa" }}>
+              <span style={{ color: T.textaa }}>
                 All messages appear at the same moment.
               </span>
             </div>
@@ -392,7 +393,7 @@ export function HeightCalcTab({ messages, L, R }: HeightCalcTabProps) {
                 background: `${R}0a`,
                 border: `1px solid ${R}25`,
                 borderRadius: 8,
-                fontFamily: "system-ui,sans-serif",
+                fontFamily: T.fontSans,
                 fontSize: 15,
                 color: R + "99",
                 animation: "slideUp 0.3s ease",
