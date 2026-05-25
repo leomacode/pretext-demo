@@ -152,7 +152,7 @@ function runRealBenchmark(
   return {
     dom: tDom.toFixed(2),
     pretext: tPretext.toFixed(2),
-    ratio: (tDom / tPretext).toFixed(1),
+    ratio: (tDom / Math.max(tPretext, 0.01)).toFixed(1),
     msgCount: messages.length,
   };
 }
