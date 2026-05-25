@@ -36,7 +36,7 @@ Measured in Chrome on MacBook Pro. Pretext column times the layout phase only
 |    1,000 |     11.9 ms |  0.3 ms |     40× |
 |    5,000 |     57.0 ms |  1.5 ms |     38× |
 
-![Speed Test screenshot](./public/speed-test.png)
+<img src="./public/speed-test.png" alt="Speed Test screenshot" loading="lazy" />
 
 ## Technical highlights
 
