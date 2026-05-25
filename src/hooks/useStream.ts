@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useRef, useState } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { pretextLayout, pretextPrepare, domMeasureHeight } from "../pretext";
 import { FONT } from "../types";
 import { STREAM_TEXT } from "../data";
@@ -14,6 +14,14 @@ export function useStream(
   const [done, setDone] = useState(false);
   const timer = useRef<ReturnType<typeof setInterval> | null>(null);
   const prevLines = useRef(0);
+
+  // Keep onShift in a ref so its identity doesn't churn `start`'s deps.
+  // Callers can pass an inline anonymous function each render without
+  // forcing every consumer to wrap it in their own useCallback.
+  const onShiftRef = useRef(onShift);
+  useEffect(() => {
+    onShiftRef.current = onShift;
+  }, [onShift]);
 
   const start = useCallback(() => {
     if (timer.current) clearInterval(timer.current);
@@ -33,12 +41,12 @@ export function useStream(
       i++;
       const partial = words.slice(0, i).join(" ");
       setText(partial);
-      if (!usePretext && onShift) {
+      if (!usePretext) {
         const bw2 = containerWidth * 0.82 - 24;
         const h = domMeasureHeight(partial, bw2, FONT);
         const lines = Math.round((h - 16) / 20);
         if (lines > prevLines.current) {
-          onShift();
+          onShiftRef.current?.();
           prevLines.current = lines;
         }
       }
@@ -48,7 +56,7 @@ export function useStream(
         setDone(true);
       }
     }, 60);
-  }, [containerWidth, usePretext, onShift]);
+  }, [containerWidth, usePretext]);
 
   useEffect(
     () => () => {
@@ -56,7 +64,11 @@ export function useStream(
     },
     [],
   );
-  return { text, active, predictedH, start, done };
+
+  return useMemo(
+    () => ({ text, active, predictedH, start, done }),
+    [text, active, predictedH, start, done],
+  );
 }
 
 export type StreamState = ReturnType<typeof useStream>;
