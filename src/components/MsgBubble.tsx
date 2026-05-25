@@ -50,9 +50,7 @@ export function MsgBubble({
               ? `${color}28`
               : `${color}14`
             : isUser
-              ? dense
-                ? `${color}10`
-                : `${color}10`
+              ? `${color}10`
               : T.fill25,
           border: `1px solid ${
             isUser
