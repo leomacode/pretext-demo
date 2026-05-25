@@ -46,7 +46,7 @@ Measured in Chrome 132 on MacBook Pro M1 Pro. Times are median of 5 runs.
 
 ## Stack
 
-React 18 · TypeScript · Vite · No UI libraries
+React 19 · TypeScript · Vite · No UI libraries
 
 ## Run locally
 
