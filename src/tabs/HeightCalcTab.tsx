@@ -45,7 +45,10 @@ export function HeightCalcTab({ messages, L, R }: HeightCalcTabProps) {
     const ro = new ResizeObserver(([e]) => {
       cancelAnimationFrame(rafId);
       rafId = requestAnimationFrame(() => {
-        setPanelWidth(e.contentRect.width / 2 - 1);
+        // Ignore zero-width fires triggered when the tab is hidden via display:none.
+        if (e.contentRect.width > 0) {
+          setPanelWidth(e.contentRect.width / 2 - 1);
+        }
       });
     });
     ro.observe(wrapperRef.current);
@@ -143,7 +146,7 @@ export function HeightCalcTab({ messages, L, R }: HeightCalcTabProps) {
     <div
       ref={wrapperRef}
       style={{
-        flex: 1,
+        height: "100%",
         display: "grid",
         gridTemplateColumns: "1fr 130px 1fr",
         minHeight: 0,

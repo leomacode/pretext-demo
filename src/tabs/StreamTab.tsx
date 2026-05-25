@@ -121,7 +121,14 @@ export function StreamTab({ appWidth, L, R }: StreamTabProps) {
   });
 
   return (
-    <>
+    <div
+      style={{
+        height: "100%",
+        display: "grid",
+        gridTemplateColumns: "1fr 130px 1fr",
+        minHeight: 0,
+      }}
+    >
       <StreamPane
         color={L}
         header="No height prediction — bubble grows word by word."
@@ -200,6 +207,6 @@ export function StreamTab({ appWidth, L, R }: StreamTabProps) {
         }
         emptyText="Waiting…"
       />
-    </>
+    </div>
   );
 }

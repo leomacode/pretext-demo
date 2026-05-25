@@ -148,22 +148,33 @@ export default function App() {
         </div>
       )}
 
-      {/* PANELS */}
-      <div
-        style={{
-          flex: 1,
-          display: "grid",
-          gridTemplateColumns: tab === "scroll" ? "1fr" : "1fr 130px 1fr",
-          minHeight: 0,
-        }}
-      >
-        {tab === "scroll" && (
+      {/* PANELS — all three stay mounted so per-tab state (benchmark
+          results, stream progress) persists across tab switches. */}
+      <div style={{ flex: 1, minHeight: 0, position: "relative" }}>
+        <div
+          style={{
+            display: tab === "scroll" ? "block" : "none",
+            height: "100%",
+          }}
+        >
           <HeightCalcTab messages={SCROLL_MESSAGES} L={L} R={R} />
-        )}
-        {tab === "stream" && <StreamTab appWidth={appWidth} L={L} R={R} />}
-        {tab === "perf" && (
+        </div>
+        <div
+          style={{
+            display: tab === "stream" ? "block" : "none",
+            height: "100%",
+          }}
+        >
+          <StreamTab appWidth={appWidth} L={L} R={R} />
+        </div>
+        <div
+          style={{
+            display: tab === "perf" ? "block" : "none",
+            height: "100%",
+          }}
+        >
           <PerfTab messages={messages} appWidth={appWidth} L={L} R={R} />
-        )}
+        </div>
       </div>
     </div>
   );

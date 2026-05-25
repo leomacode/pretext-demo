@@ -46,7 +46,14 @@ export function PerfTab({ messages, appWidth, L, R }: PerfTabProps) {
     : "100%";
 
   return (
-    <>
+    <div
+      style={{
+        height: "100%",
+        display: "grid",
+        gridTemplateColumns: "1fr 130px 1fr",
+        minHeight: 0,
+      }}
+    >
       <PerfPane
         color={L}
         header={
@@ -198,6 +205,6 @@ export function PerfTab({ messages, appWidth, L, R }: PerfTabProps) {
         messages={messages}
         softUser
       />
-    </>
+    </div>
   );
 }
