@@ -1,20 +1,16 @@
 import { useState, useEffect, useRef, useCallback } from "react";
+import {
+  pretextPrepare,
+  pretextLayout,
+  domMeasureHeight,
+  clearPretextCache,
+} from "./pretext";
 
-// ─────────────────────────────────────────────
-// TYPES
-// ─────────────────────────────────────────────
 interface Message {
   id: number;
   role: "user" | "assistant";
   text: string;
   timestamp: Date;
-}
-
-interface PreparedText {
-  words: string[];
-  widths: Map<string, number>;
-  spaceWidth: number;
-  font: string;
 }
 
 interface BenchmarkResult {
@@ -25,88 +21,6 @@ interface BenchmarkResult {
 }
 
 type Phase = "idle" | "running" | "done";
-
-// ─────────────────────────────────────────────
-// PRETEXT CORE (simulation — replace with real lib)
-// Real lib: npm install @chenglou/pretext
-// ─────────────────────────────────────────────
-// Shared canvas — created once, reused for all measurements (no per-call allocation)
-const sharedCanvas =
-  typeof OffscreenCanvas !== "undefined"
-    ? new OffscreenCanvas(1, 1)
-    : document.createElement("canvas");
-const sharedCtx = sharedCanvas.getContext("2d") as CanvasRenderingContext2D;
-
-// Word-level cache: "font::word" → width
-// Reuses measurements across all messages that share vocabulary
-const wordWidthCache = new Map<string, number>();
-
-function getWordWidth(word: string, font: string): number {
-  const key = `${font}::${word}`;
-  if (!wordWidthCache.has(key)) {
-    sharedCtx.font = font;
-    wordWidthCache.set(key, sharedCtx.measureText(word).width);
-  }
-  return wordWidthCache.get(key)!;
-}
-
-// Text-level cache: avoid re-splitting + re-looking-up same full text
-const pretextCache = new Map<string, PreparedText>();
-
-function pretextPrepare(text: string, font: string): PreparedText {
-  const key = `${font}::${text}`;
-  if (pretextCache.has(key)) return pretextCache.get(key)!;
-  sharedCtx.font = font;
-  const words = text.split(" ");
-  // Use Map for O(1) lookups — faster than object string hashing in hot loops
-  const widths = new Map<string, number>();
-  for (const w of words) {
-    if (!widths.has(w)) widths.set(w, getWordWidth(w, font));
-  }
-  const result: PreparedText = {
-    words,
-    widths,
-    spaceWidth: getWordWidth(" ", font),
-    font,
-  };
-  pretextCache.set(key, result);
-  return result;
-}
-
-function pretextLayout(
-  prepared: PreparedText,
-  containerWidth: number,
-  lineHeight = 24,
-): number {
-  const { words, widths, spaceWidth } = prepared;
-  let lines = 0,
-    lineW = 0;
-  for (const w of words) {
-    const ww = (widths.get(w) ?? 8) + spaceWidth;
-    if (lineW + ww > containerWidth && lineW > 0) {
-      lines++;
-      lineW = ww;
-    } else {
-      lineW += ww;
-    }
-  }
-  if (lineW > 0) lines++;
-  return Math.max(lines * lineHeight, 24);
-}
-
-function domMeasureHeight(
-  text: string,
-  containerWidth: number,
-  font: string,
-): number {
-  const div = document.createElement("div");
-  div.style.cssText = `position:fixed;visibility:hidden;top:-9999px;width:${containerWidth}px;font:${font};padding:8px 12px;word-break:break-word;white-space:pre-wrap;box-sizing:border-box;line-height:24px;`;
-  div.textContent = text;
-  document.body.appendChild(div);
-  const h = div.getBoundingClientRect().height; // ← triggers reflow
-  document.body.removeChild(div);
-  return h;
-}
 
 // ─────────────────────────────────────────────
 // DATA
@@ -230,7 +144,7 @@ function runRealBenchmark(
   const tDom = performance.now() - t1;
   document.body.removeChild(domContainer);
 
-  pretextCache.clear();
+  clearPretextCache();
   const t2 = performance.now();
   messages.forEach((msg) => pretextLayout(pretextPrepare(msg.text, FONT), bw));
   const tPretext = performance.now() - t2;
