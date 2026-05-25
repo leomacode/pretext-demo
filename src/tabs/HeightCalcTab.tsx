@@ -3,7 +3,12 @@ import { DoneNote } from "../components/DoneNote";
 import { EmptyHint } from "../components/EmptyHint";
 import { MsgBubble } from "../components/MsgBubble";
 import { PaneShell } from "../components/PaneShell";
-import { pretextLayout, pretextPrepare, domMeasureHeight } from "../pretext";
+import {
+  clearPretextCache,
+  domMeasureHeight,
+  pretextLayout,
+  pretextPrepare,
+} from "../pretext";
 import { T } from "../theme";
 import { FONT, type Message, type Phase } from "../types";
 
@@ -67,10 +72,16 @@ export function HeightCalcTab({ messages, L, R }: HeightCalcTabProps) {
 
     const bw = panelWidth * 0.82 - 24;
 
+    // Pretext's pitch: prepare ONCE upfront, then layout is pure math on
+    // every reflow. Time only the layout phase to match what production code
+    // actually pays per re-render. Matches runRealBenchmark in Speed Test tab.
+    clearPretextCache();
+    const prepared = messages.map((msg) => pretextPrepare(msg.text, FONT));
+    // Warm-up pass: JIT-compile the layout call and prime CPU caches so the
+    // measurement isn't dominated by first-call setup at small N.
+    for (const p of prepared) pretextLayout(p, bw);
     const t2 = performance.now();
-    for (let i = 0; i < messages.length; i++) {
-      pretextLayout(pretextPrepare(messages[i].text, FONT), bw);
-    }
+    for (const p of prepared) pretextLayout(p, bw);
     const rightTime = parseFloat((performance.now() - t2).toFixed(2));
     setRightMs(rightTime);
 

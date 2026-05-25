@@ -30,7 +30,7 @@ export function generateMessages(count = 80): Message[] {
   }));
 }
 
-export const SCROLL_MESSAGES: Message[] = generateMessages(50);
+export const SCROLL_MESSAGES: Message[] = generateMessages(120);
 
 export const STREAM_TEXT =
   "This response is arriving word by word, just like a real AI assistant. Watch the left side carefully — the chat bubble keeps growing and pushing everything below it down the page. That jumping is called a layout shift, and it happens on every single new line. Now look at the right side. The space for this message was reserved before the first word arrived, so nothing moves at all. That is the difference Pretext makes.";
