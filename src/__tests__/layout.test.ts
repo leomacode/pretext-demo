@@ -5,8 +5,18 @@ const FONT = "16px sans-serif";
 const WIDTH = 400;
 const LINE_HEIGHT = 24;
 
+// @chenglou/pretext needs a Canvas 2D context, which happy-dom doesn't
+// provide. Probe once; skip layout assertions when unavailable.
+const canvasWorks = (() => {
+  try {
+    layout("probe", WIDTH, FONT);
+    return true;
+  } catch {
+    return false;
+  }
+})();
+
 // happy-dom has no layout engine, so getBoundingClientRect().height returns 0.
-// Detect this once and switch cross-validation off when measurement is unavailable.
 const domWorks = domMeasureHeight("probe", WIDTH, FONT) > 0;
 
 describe("layout(): Pretext height calculation", () => {
@@ -24,24 +34,26 @@ describe("layout(): Pretext height calculation", () => {
     ["empty", ""],
   ];
 
-  it.each(cases)("returns a positive height for %s", (_label, text) => {
-    const h = layout(text, WIDTH, FONT);
-    expect(h).toBeGreaterThanOrEqual(LINE_HEIGHT);
-  });
+  it.skipIf(!canvasWorks).each(cases)(
+    "returns a positive height for %s",
+    (_label, text) => {
+      const h = layout(text, WIDTH, FONT);
+      expect(h).toBeGreaterThanOrEqual(LINE_HEIGHT);
+    },
+  );
 
-  it("returns more height for text that overflows a single line", () => {
-    const short = layout("Hi", WIDTH, FONT);
-    const long = layout(
-      "word ".repeat(200).trim(),
-      WIDTH,
-      FONT,
-    );
-    expect(long).toBeGreaterThan(short);
-  });
+  it.skipIf(!canvasWorks)(
+    "returns more height for text that overflows a single line",
+    () => {
+      const short = layout("Hi", WIDTH, FONT);
+      const long = layout("word ".repeat(200).trim(), WIDTH, FONT);
+      expect(long).toBeGreaterThan(short);
+    },
+  );
 
-  // Real cross-validation against the DOM — only runs in environments that
-  // actually lay out CSS (real browsers, jsdom-with-css). Skipped in happy-dom.
-  it.skipIf(!domWorks).each(cases)(
+  // Real cross-validation — only runs in environments with both a Canvas
+  // context and a CSS layout engine (real browsers, jsdom-with-css).
+  it.skipIf(!canvasWorks || !domWorks).each(cases)(
     "matches DOM within ±2px for %s",
     (_label, text) => {
       const pretextHeight = layout(text, WIDTH, FONT);
