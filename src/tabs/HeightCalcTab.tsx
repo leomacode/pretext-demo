@@ -44,21 +44,16 @@ export function HeightCalcTab({ messages, L, R }: HeightCalcTabProps) {
 
     const bw = panelWidth * 0.82 - 24;
 
-    const rightHeights = new Float32Array(messages.length);
     const t2 = performance.now();
     for (let i = 0; i < messages.length; i++) {
-      rightHeights[i] = pretextLayout(
-        pretextPrepare(messages[i].text, FONT),
-        bw,
-      );
+      pretextLayout(pretextPrepare(messages[i].text, FONT), bw);
     }
     const rightTime = parseFloat((performance.now() - t2).toFixed(2));
     setRightMs(rightTime);
 
-    const leftHeights = new Float32Array(messages.length);
     const leftStart = performance.now();
     for (let i = 0; i < messages.length; i++) {
-      leftHeights[i] = domMeasureHeight(messages[i].text, bw, FONT);
+      domMeasureHeight(messages[i].text, bw, FONT);
     }
     const leftTime = parseFloat((performance.now() - leftStart).toFixed(2));
 
