@@ -1,5 +1,7 @@
 import { useCallback, useState } from "react";
 import { runRealBenchmark } from "../benchmark";
+import { CenterRail } from "../components/CenterRail";
+import { PerfPane } from "../components/PerfPane";
 import { generateMessages } from "../data";
 import { T } from "../theme";
 import type { BenchmarkResult, Message } from "../types";
@@ -10,6 +12,8 @@ interface PerfTabProps {
   L: string;
   R: string;
 }
+
+const SIZES = [100, 1000, 5000];
 
 export function PerfTab({ messages, appWidth, L, R }: PerfTabProps) {
   const [perfResult, setPerfResult] = useState<BenchmarkResult | null>(null);
@@ -33,218 +37,53 @@ export function PerfTab({ messages, appWidth, L, R }: PerfTabProps) {
     }, 60);
   }, [perfSize, appWidth]);
 
+  const perMsgMs = perfResult
+    ? parseFloat(perfResult.dom) / perfResult.msgCount
+    : 0;
+
+  const pretextBarWidth = perfResult
+    ? `${Math.min(100, (parseFloat(perfResult.pretext) / parseFloat(perfResult.dom)) * 100)}%`
+    : "100%";
+
   return (
     <>
-      {/* LEFT — DOM */}
-      <div style={{ display: "flex", flexDirection: "column", minHeight: 0 }}>
-        <div
-          style={{
-            padding: "10px 14px",
-            borderBottom: `1px solid ${L}18`,
-            flexShrink: 0,
-            background: `${L}05`,
-            minHeight: 52,
-            display: "flex",
-            alignItems: "center",
-          }}
-        >
-          <div
-            style={{
-              fontSize: 14,
-              color: T.textaa,
-              fontFamily: T.fontSans,
-              lineHeight: 1.5,
-            }}
-          >
+      <PerfPane
+        color={L}
+        header={
+          <>
             Old method — browser pauses and re-measures
             <br />
             the whole page for every single message.
-          </div>
-        </div>
-        {perfResult && (
+          </>
+        }
+        result={perfResult}
+        value={perfResult?.dom}
+        valueSuffix={
           <div
             style={{
-              padding: "10px 14px",
-              borderBottom: `1px solid ${L}18`,
-              background: `${L}0a`,
-              flexShrink: 0,
-              animation: "slideUp 0.3s ease",
+              fontSize: 15,
+              color: T.textcc,
+              fontFamily: T.fontSans,
             }}
           >
-            <div
-              style={{
-                display: "flex",
-                alignItems: "baseline",
-                gap: 8,
-                marginBottom: 4,
-              }}
-            >
-              <div
-                style={{
-                  fontSize: 32,
-                  fontWeight: 700,
-                  color: L,
-                  lineHeight: 1,
-                }}
-              >
-                {perfResult.dom}
-                <span
-                  style={{
-                    fontSize: 15,
-                    fontWeight: 400,
-                    color: T.textcc,
-                    marginLeft: 3,
-                  }}
-                >
-                  ms
-                </span>
-              </div>
-              <div
-                style={{
-                  fontSize: 15,
-                  color: T.textcc,
-                  fontFamily: T.fontSans,
-                }}
-              >
-                to measure {perfResult.msgCount} messages
-              </div>
-            </div>
-            <div
-              style={{
-                height: 4,
-                background: T.line5,
-                borderRadius: 2,
-                marginBottom: 6,
-              }}
-            >
-              <div
-                style={{
-                  height: "100%",
-                  width: "100%",
-                  background: L,
-                  borderRadius: 2,
-                  boxShadow: `0 0 8px ${L}`,
-                }}
-              />
-            </div>
-            <div
-              style={{
-                fontSize: 14,
-                color: T.textbb,
-                fontFamily: T.fontSans,
-                lineHeight: 1.7,
-              }}
-            >
-              ⏱{" "}
-              {(parseFloat(perfResult.dom) / perfResult.msgCount).toFixed(2)}
-              ms per message ·{" "}
-              <span style={{ color: L }}>
-                ⚠️ Just{" "}
-                {Math.max(
-                  1,
-                  Math.floor(
-                    16 / (parseFloat(perfResult.dom) / perfResult.msgCount),
-                  ),
-                )}{" "}
-                messages = already slow enough to feel laggy
-              </span>
-            </div>
+            to measure {perfResult?.msgCount} messages
           </div>
-        )}
-        <div style={{ flex: 1, overflowY: "auto", padding: "8px 0" }}>
-          {messages.map((msg, i) => {
-            const isUser = msg.role === "user";
-            return (
-              <div
-                key={msg.id}
-                style={{
-                  display: "flex",
-                  justifyContent: isUser ? "flex-end" : "flex-start",
-                  padding: "3px 12px",
-                  background: perfRunning ? `${L}06` : "transparent",
-                  transition: "background 0.3s",
-                }}
-              >
-                <div
-                  style={{
-                    maxWidth: "82%",
-                    borderRadius: isUser
-                      ? "10px 10px 2px 10px"
-                      : "10px 10px 10px 2px",
-                    padding: "5px 10px",
-                    background: isUser ? `${L}10` : T.fill25,
-                    border: `1px solid ${isUser ? L + "22" : T.fill6}`,
-                    position: "relative",
-                  }}
-                >
-                  {perfRunning && (
-                    <div
-                      style={{
-                        position: "absolute",
-                        inset: 0,
-                        borderRadius: "inherit",
-                        background: `${L}15`,
-                        animation: `benchFlash ${0.05 + (i % 5) * 0.02}s ease infinite alternate`,
-                      }}
-                    />
-                  )}
-                  <div
-                    style={{
-                      fontSize: 15,
-                      color: T.text77,
-                      marginBottom: 2,
-                      fontFamily: T.fontMono,
-                    }}
-                  >
-                    {isUser ? "YOU" : "AI"} ·{" "}
-                    {msg.timestamp.toLocaleTimeString([], {
-                      hour: "2-digit",
-                      minute: "2-digit",
-                    })}
-                  </div>
-                  <div
-                    style={{
-                      fontSize: 14,
-                      lineHeight: "18px",
-                      color: isUser ? "#d0ffd0" : "#909090",
-                      fontFamily: T.fontMono,
-                      whiteSpace: "pre-wrap",
-                      wordBreak: "break-word",
-                    }}
-                  >
-                    {msg.text}
-                  </div>
-                  {perfResult && (
-                    <div
-                      style={{
-                        marginTop: 3,
-                        fontSize: 15,
-                        color: L + "66",
-                        fontFamily: T.fontMono,
-                      }}
-                    >
-                      ← measured via DOM reflow
-                    </div>
-                  )}
-                </div>
-              </div>
-            );
-          })}
-        </div>
-      </div>
+        }
+        statFooter={
+          <>
+            ⏱ {perMsgMs.toFixed(2)}ms per message ·{" "}
+            <span style={{ color: L }}>
+              ⚠️ Just {Math.max(1, Math.floor(16 / perMsgMs))} messages = already
+              slow enough to feel laggy
+            </span>
+          </>
+        }
+        bubbleFooter="← measured via DOM reflow"
+        messages={messages}
+        showFlash={perfRunning}
+      />
 
-      {/* CENTER BUTTON */}
-      <div
-        style={{
-          display: "flex",
-          flexDirection: "column",
-          alignItems: "center",
-          paddingTop: 10,
-          background: T.surface,
-          borderLeft: "1px solid rgba(255,255,255,0.07)",
-          borderRight: "1px solid rgba(255,255,255,0.07)",
-        }}
-      >
+      <CenterRail>
         <div
           style={{
             display: "flex",
@@ -254,7 +93,7 @@ export function PerfTab({ messages, appWidth, L, R }: PerfTabProps) {
             justifyContent: "center",
           }}
         >
-          {[100, 1000, 5000].map((n) => (
+          {SIZES.map((n) => (
             <button
               key={n}
               onClick={() => setPerfSize(n)}
@@ -264,10 +103,7 @@ export function PerfTab({ messages, appWidth, L, R }: PerfTabProps) {
                 padding: "4px 0",
                 fontSize: 12,
                 fontFamily: T.fontMono,
-                background:
-                  perfSize === n
-                    ? T.fill15
-                    : T.fill4,
+                background: perfSize === n ? T.fill15 : T.fill4,
                 border: `1px solid ${perfSize === n ? T.fill40 : T.fill10}`,
                 borderRadius: 4,
                 color: perfSize === n ? "#fff" : T.text88,
@@ -287,10 +123,8 @@ export function PerfTab({ messages, appWidth, L, R }: PerfTabProps) {
             fontSize: 15,
             fontFamily: T.fontSans,
             fontWeight: 600,
-            background: perfRunning
-              ? T.fill4
-              : T.fill8,
-            border: "1px solid rgba(255,255,255,0.2)",
+            background: perfRunning ? T.fill4 : T.fill8,
+            border: `1px solid ${T.fill20}`,
             borderRadius: 8,
             color: perfRunning ? T.textaa : T.text99,
             cursor: perfRunning ? "not-allowed" : "pointer",
@@ -320,186 +154,49 @@ export function PerfTab({ messages, appWidth, L, R }: PerfTabProps) {
           <br />
           methods at once
         </div>
-      </div>
+      </CenterRail>
 
-      {/* RIGHT — Pretext */}
-      <div style={{ display: "flex", flexDirection: "column", minHeight: 0 }}>
-        <div
-          style={{
-            padding: "10px 14px",
-            borderBottom: `1px solid ${R}18`,
-            flexShrink: 0,
-            background: `${R}05`,
-            minHeight: 52,
-            display: "flex",
-            alignItems: "center",
-          }}
-        >
-          <div
-            style={{
-              fontSize: 14,
-              color: T.textaa,
-              fontFamily: T.fontSans,
-              lineHeight: 1.5,
-            }}
-          >
+      <PerfPane
+        color={R}
+        header={
+          <>
             Pretext — measures each word once via Canvas,
             <br />
             then does pure math. No page pausing.
-          </div>
-        </div>
-        {perfResult && (
-          <div
-            style={{
-              padding: "10px 14px",
-              borderBottom: `1px solid ${R}18`,
-              background: `${R}0a`,
-              flexShrink: 0,
-              animation: "slideUp 0.3s ease",
-            }}
-          >
+          </>
+        }
+        result={perfResult}
+        value={perfResult?.pretext}
+        valueSuffix={
+          perfResult && (
             <div
               style={{
-                display: "flex",
-                alignItems: "baseline",
-                gap: 8,
-                marginBottom: 4,
-              }}
-            >
-              <div
-                style={{
-                  fontSize: 32,
-                  fontWeight: 700,
-                  color: R,
-                  lineHeight: 1,
-                }}
-              >
-                {perfResult.pretext}
-                <span
-                  style={{
-                    fontSize: 15,
-                    fontWeight: 400,
-                    color: T.textcc,
-                    marginLeft: 3,
-                  }}
-                >
-                  ms
-                </span>
-              </div>
-              <div
-                style={{
-                  padding: "2px 8px",
-                  background: `${R}20`,
-                  border: `1px solid ${R}40`,
-                  borderRadius: 4,
-                  fontSize: 14,
-                  fontWeight: 700,
-                  color: R,
-                  fontFamily: T.fontSans,
-                }}
-              >
-                {perfResult.ratio}× faster
-              </div>
-            </div>
-            <div
-              style={{
-                height: 4,
-                background: T.line5,
-                borderRadius: 2,
-                marginBottom: 6,
-              }}
-            >
-              <div
-                style={{
-                  height: "100%",
-                  borderRadius: 2,
-                  background: R,
-                  boxShadow: `0 0 8px ${R}`,
-                  width: `${Math.min(100, (parseFloat(perfResult.pretext) / parseFloat(perfResult.dom)) * 100)}%`,
-                  transition: "width 1.2s ease",
-                }}
-              />
-            </div>
-            <div
-              style={{
+                padding: "2px 8px",
+                background: `${R}20`,
+                border: `1px solid ${R}40`,
+                borderRadius: 4,
                 fontSize: 14,
-                color: T.textbb,
+                fontWeight: 700,
+                color: R,
                 fontFamily: T.fontSans,
-                lineHeight: 1.7,
               }}
             >
+              {perfResult.ratio}× faster
+            </div>
+          )
+        }
+        barWidth={pretextBarWidth}
+        statFooter={
+          perfResult && (
+            <>
               ✅ {perfResult.pretext}ms total · fits inside one 16ms screen
               refresh · zero page pauses
-            </div>
-          </div>
-        )}
-        <div style={{ flex: 1, overflowY: "auto", padding: "8px 0" }}>
-          {messages.map((msg) => {
-            const isUser = msg.role === "user";
-            return (
-              <div
-                key={msg.id}
-                style={{
-                  display: "flex",
-                  justifyContent: isUser ? "flex-end" : "flex-start",
-                  padding: "3px 12px",
-                }}
-              >
-                <div
-                  style={{
-                    maxWidth: "82%",
-                    borderRadius: isUser
-                      ? "10px 10px 2px 10px"
-                      : "10px 10px 10px 2px",
-                    padding: "5px 10px",
-                    background: isUser ? `${R}08` : T.fill25,
-                    border: `1px solid ${isUser ? R + "20" : T.fill6}`,
-                  }}
-                >
-                  <div
-                    style={{
-                      fontSize: 15,
-                      color: T.text77,
-                      marginBottom: 2,
-                      fontFamily: T.fontMono,
-                    }}
-                  >
-                    {isUser ? "YOU" : "AI"} ·{" "}
-                    {msg.timestamp.toLocaleTimeString([], {
-                      hour: "2-digit",
-                      minute: "2-digit",
-                    })}
-                  </div>
-                  <div
-                    style={{
-                      fontSize: 14,
-                      lineHeight: "18px",
-                      color: isUser ? "#d0ffd0" : "#909090",
-                      fontFamily: T.fontMono,
-                      whiteSpace: "pre-wrap",
-                      wordBreak: "break-word",
-                    }}
-                  >
-                    {msg.text}
-                  </div>
-                  {perfResult && (
-                    <div
-                      style={{
-                        marginTop: 3,
-                        fontSize: 15,
-                        color: R + "66",
-                        fontFamily: T.fontMono,
-                      }}
-                    >
-                      ← height from Canvas math, no DOM needed
-                    </div>
-                  )}
-                </div>
-              </div>
-            );
-          })}
-        </div>
-      </div>
+            </>
+          )
+        }
+        bubbleFooter="← height from Canvas math, no DOM needed"
+        messages={messages}
+      />
     </>
   );
 }
