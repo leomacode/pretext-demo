@@ -1,6 +1,9 @@
 import { useCallback, useEffect, useRef, useState } from "react";
-import { pretextLayout, pretextPrepare, domMeasureHeight } from "../pretext";
+import { DoneNote } from "../components/DoneNote";
+import { EmptyHint } from "../components/EmptyHint";
 import { MsgBubble } from "../components/MsgBubble";
+import { PaneShell } from "../components/PaneShell";
+import { pretextLayout, pretextPrepare, domMeasureHeight } from "../pretext";
 import { T } from "../theme";
 import { FONT, type Message, type Phase } from "../types";
 
@@ -10,6 +13,24 @@ interface HeightCalcTabProps {
   R: string;
 }
 
+function Chip({ color, children }: { color: string; children: React.ReactNode }) {
+  return (
+    <div
+      style={{
+        background: `${color}15`,
+        border: `1px solid ${color}33`,
+        borderRadius: 6,
+        padding: "3px 10px",
+        fontFamily: T.fontMono,
+        fontSize: 15,
+        color,
+      }}
+    >
+      {children}
+    </div>
+  );
+}
+
 export function HeightCalcTab({ messages, L, R }: HeightCalcTabProps) {
   const [phase, setPhase] = useState<Phase>("idle");
   const [leftVisible, setLeftVisible] = useState<number[]>([]);
@@ -17,7 +38,6 @@ export function HeightCalcTab({ messages, L, R }: HeightCalcTabProps) {
   const [rightMs, setRightMs] = useState<number | null>(null);
   const [panelWidth, setPanelWidth] = useState(400);
   const wrapperRef = useRef<HTMLDivElement>(null);
-  const leftRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
     if (!wrapperRef.current) return;
@@ -76,6 +96,49 @@ export function HeightCalcTab({ messages, L, R }: HeightCalcTabProps) {
     setRightMs(null);
   }, []);
 
+  // Header content for the left (DOM) pane.
+  const leftHeader = (
+    <>
+      {phase === "idle" && "Ready — press Load to start"}
+      {phase === "running" && (
+        <span style={{ color: L }}>
+          ⏳ Measuring message {leftVisible.length} of {messages.length}…
+          <span style={{ color: T.textbb, marginLeft: 6 }}>
+            each one pauses the page
+          </span>
+        </span>
+      )}
+      {phase === "done" && leftMs !== null && (
+        <span>
+          Took <strong style={{ color: L, fontSize: 13 }}>{leftMs}ms</strong> ·{" "}
+          {messages.length} page pauses
+        </span>
+      )}
+    </>
+  );
+
+  // Header content for the right (Pretext) pane.
+  const rightHeader = (
+    <>
+      {phase === "idle" && "Ready — Pretext will load instantly"}
+      {phase === "running" && rightMs !== null && (
+        <span style={{ color: R }}>
+          ✅ Done in <strong style={{ fontSize: 13 }}>{rightMs}ms</strong> — all{" "}
+          {messages.length} heights at once
+        </span>
+      )}
+      {phase === "running" && rightMs === null && (
+        <span style={{ color: R }}>⚡ Calculating…</span>
+      )}
+      {phase === "done" && rightMs !== null && (
+        <span>
+          Took <strong style={{ color: R, fontSize: 13 }}>{rightMs}ms</strong> ·
+          zero page pauses
+        </span>
+      )}
+    </>
+  );
+
   return (
     <div
       ref={wrapperRef}
@@ -86,121 +149,47 @@ export function HeightCalcTab({ messages, L, R }: HeightCalcTabProps) {
         minHeight: 0,
       }}
     >
-      {/* LEFT */}
-      <div
-        style={{
-          display: "flex",
-          flexDirection: "column",
-          minHeight: 0,
-          borderRight: "1px solid rgba(255,255,255,0.07)",
-        }}
-      >
-        <div
-          style={{
-            padding: "8px 14px",
-            borderBottom: `1px solid ${L}18`,
-            background: `${L}05`,
-            flexShrink: 0,
-            minHeight: 44,
-            display: "flex",
-            alignItems: "center",
-            justifyContent: "space-between",
-          }}
-        >
-          <div
-            style={{
-              fontSize: 14,
-              color: T.textbb,
-              fontFamily: T.fontSans,
-            }}
-          >
-            {phase === "idle" && "Ready — press Load to start"}
-            {phase === "running" && (
-              <span style={{ color: L }}>
-                ⏳ Measuring message {leftVisible.length} of {messages.length}…
-                <span style={{ color: T.textbb, marginLeft: 6 }}>
-                  each one pauses the page
-                </span>
-              </span>
-            )}
-            {phase === "done" && leftMs !== null && (
-              <span>
-                Took{" "}
-                <strong style={{ color: L, fontSize: 13 }}>{leftMs}ms</strong> ·{" "}
-                {messages.length} page pauses
-              </span>
-            )}
-          </div>
-          {phase !== "idle" && (
-            <div
-              style={{
-                background: `${L}15`,
-                border: `1px solid ${L}33`,
-                borderRadius: 6,
-                padding: "3px 10px",
-                fontFamily: T.fontMono,
-                fontSize: 15,
-                color: L,
-              }}
-            >
+      {/* LEFT — DOM */}
+      <PaneShell
+        color={L}
+        borderRight
+        header={leftHeader}
+        chip={
+          phase !== "idle" && (
+            <Chip color={L}>
               {leftVisible.length} / {messages.length}
-            </div>
-          )}
-        </div>
-        <div
-          ref={leftRef}
-          style={{ flex: 1, overflowY: "auto", paddingTop: 6 }}
-        >
-          {phase === "idle" && (
-            <div
-              style={{
-                padding: "40px 20px",
-                textAlign: "center",
-                color: T.text77,
-                fontSize: 15,
-                fontFamily: T.fontSans,
-                lineHeight: 1.8,
-              }}
-            >
-              The old approach asks the browser to measure
-              <br />
-              each message one by one.
-              <br />
-              <br />
-              <span style={{ color: T.textaa }}>
-                Press "Load" to see it happen.
-              </span>
-            </div>
-          )}
-          {leftVisible.map((idx) => (
-            <MsgBubble
-              key={idx}
-              msg={messages[idx]}
-              color={L}
-              highlight={idx === leftVisible.length - 1}
-            />
-          ))}
-          {phase === "done" && (
-            <div
-              style={{
-                margin: "10px 12px",
-                padding: "10px 14px",
-                background: `${L}0a`,
-                border: `1px solid ${L}25`,
-                borderRadius: 8,
-                fontFamily: T.fontSans,
-                fontSize: 15,
-                color: L + "99",
-                animation: "slideUp 0.3s ease",
-              }}
-            >
-              ✅ Done. The browser paused{" "}
-              <strong style={{ color: L }}>{messages.length} times</strong> —
-              once per message — before anything could be shown.
-            </div>
-          )}
-        </div>
-      </div>
+            </Chip>
+          )
+        }
+      >
+        {phase === "idle" && (
+          <EmptyHint>
+            The old approach asks the browser to measure
+            <br />
+            each message one by one.
+            <br />
+            <br />
+            <span style={{ color: T.textaa }}>
+              Press "Load" to see it happen.
+            </span>
+          </EmptyHint>
+        )}
+        {leftVisible.map((idx) => (
+          <MsgBubble
+            key={idx}
+            msg={messages[idx]}
+            color={L}
+            highlight={idx === leftVisible.length - 1}
+          />
+        ))}
+        {phase === "done" && (
+          <DoneNote color={L}>
+            ✅ Done. The browser paused{" "}
+            <strong style={{ color: L }}>{messages.length} times</strong> —
+            once per message — before anything could be shown.
+          </DoneNote>
+        )}
+      </PaneShell>
 
       {/* CENTER */}
       <div
@@ -210,7 +199,7 @@ export function HeightCalcTab({ messages, L, R }: HeightCalcTabProps) {
           alignItems: "center",
           paddingTop: 10,
           background: T.surface,
-          borderRight: "1px solid rgba(255,255,255,0.07)",
+          borderRight: `1px solid ${T.line}`,
         }}
       >
         <button
@@ -222,18 +211,14 @@ export function HeightCalcTab({ messages, L, R }: HeightCalcTabProps) {
             fontSize: 15,
             fontFamily: T.fontSans,
             fontWeight: 600,
-            background:
-              phase === "running"
-                ? T.fill1
-                : T.fill8,
-            border: "1px solid rgba(255,255,255,0.2)",
+            background: phase === "running" ? T.fill1 : T.fill8,
+            border: `1px solid ${T.fill20}`,
             borderRadius: 8,
             color: phase === "running" ? T.text77 : T.text88,
             cursor: phase === "running" ? "not-allowed" : "pointer",
             textAlign: "center",
             lineHeight: 1.5,
-            boxShadow:
-              phase === "running" ? "none" : "0 0 12px rgba(255,255,255,0.05)",
+            boxShadow: phase === "running" ? "none" : "0 0 12px rgba(255,255,255,0.05)",
             transition: "all 0.2s",
           }}
         >
@@ -279,7 +264,7 @@ export function HeightCalcTab({ messages, L, R }: HeightCalcTabProps) {
               style={{
                 fontSize: 20,
                 fontWeight: 700,
-                color: "#00ff9d",
+                color: R,
                 fontFamily: T.fontMono,
               }}
             >
@@ -299,107 +284,41 @@ export function HeightCalcTab({ messages, L, R }: HeightCalcTabProps) {
         )}
       </div>
 
-      {/* RIGHT */}
-      <div style={{ display: "flex", flexDirection: "column", minHeight: 0 }}>
-        <div
-          style={{
-            padding: "8px 14px",
-            borderBottom: `1px solid ${R}18`,
-            background: `${R}05`,
-            flexShrink: 0,
-            minHeight: 44,
-            display: "flex",
-            alignItems: "center",
-            justifyContent: "space-between",
-          }}
-        >
-          <div
-            style={{
-              fontSize: 14,
-              color: T.textbb,
-              fontFamily: T.fontSans,
-            }}
-          >
-            {phase === "idle" && "Ready — Pretext will load instantly"}
-            {phase === "running" && rightMs !== null && (
-              <span style={{ color: R }}>
-                ✅ Done in <strong style={{ fontSize: 13 }}>{rightMs}ms</strong>{" "}
-                — all {messages.length} heights at once
-              </span>
-            )}
-            {phase === "running" && rightMs === null && (
-              <span style={{ color: R }}>⚡ Calculating…</span>
-            )}
-            {phase === "done" && rightMs !== null && (
-              <span>
-                Took{" "}
-                <strong style={{ color: R, fontSize: 13 }}>{rightMs}ms</strong>{" "}
-                · zero page pauses
-              </span>
-            )}
-          </div>
-          {phase !== "idle" && (
-            <div
-              style={{
-                background: `${R}15`,
-                border: `1px solid ${R}33`,
-                borderRadius: 6,
-                padding: "3px 10px",
-                fontFamily: T.fontMono,
-                fontSize: 15,
-                color: R,
-              }}
-            >
+      {/* RIGHT — Pretext */}
+      <PaneShell
+        color={R}
+        header={rightHeader}
+        chip={
+          phase !== "idle" && (
+            <Chip color={R}>
               {messages.length} / {messages.length}
-            </div>
-          )}
-        </div>
-        <div style={{ flex: 1, overflowY: "auto", paddingTop: 6 }}>
-          {phase === "idle" && (
-            <div
-              style={{
-                padding: "40px 20px",
-                textAlign: "center",
-                color: T.text77,
-                fontSize: 15,
-                fontFamily: T.fontSans,
-                lineHeight: 1.8,
-              }}
-            >
-              Pretext measures all words once via Canvas,
-              <br />
-              then calculates every height with pure math.
-              <br />
-              <br />
-              <span style={{ color: T.textaa }}>
-                All messages appear at the same moment.
-              </span>
-            </div>
-          )}
-          {phase !== "idle" &&
-            messages.map((msg, idx) => (
-              <MsgBubble key={idx} msg={msg} color={R} highlight={false} />
-            ))}
-          {phase === "done" && (
-            <div
-              style={{
-                margin: "10px 12px",
-                padding: "10px 14px",
-                background: `${R}0a`,
-                border: `1px solid ${R}25`,
-                borderRadius: 8,
-                fontFamily: T.fontSans,
-                fontSize: 15,
-                color: R + "99",
-                animation: "slideUp 0.3s ease",
-              }}
-            >
-              ✅ Done. Zero page pauses. Pretext calculated all{" "}
-              {messages.length} heights before rendering anything.
-            </div>
-          )}
-        </div>
-      </div>
+            </Chip>
+          )
+        }
+      >
+        {phase === "idle" && (
+          <EmptyHint>
+            Pretext measures all words once via Canvas,
+            <br />
+            then calculates every height with pure math.
+            <br />
+            <br />
+            <span style={{ color: T.textaa }}>
+              All messages appear at the same moment.
+            </span>
+          </EmptyHint>
+        )}
+        {phase !== "idle" &&
+          messages.map((msg, idx) => (
+            <MsgBubble key={idx} msg={msg} color={R} />
+          ))}
+        {phase === "done" && (
+          <DoneNote color={R}>
+            ✅ Done. Zero page pauses. Pretext calculated all{" "}
+            {messages.length} heights before rendering anything.
+          </DoneNote>
+        )}
+      </PaneShell>
     </div>
   );
 }
