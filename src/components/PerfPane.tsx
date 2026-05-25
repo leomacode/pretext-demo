@@ -19,6 +19,8 @@ interface PerfPaneProps {
   messages: Message[];
   /** Animated flash overlay on bubbles while a benchmark is in flight. */
   showFlash?: boolean;
+  /** Softer user-bubble tint (used by the Pretext side). */
+  softUser?: boolean;
 }
 
 export function PerfPane({
@@ -32,6 +34,7 @@ export function PerfPane({
   bubbleFooter,
   messages,
   showFlash = false,
+  softUser = false,
 }: PerfPaneProps) {
   return (
     <div style={{ display: "flex", flexDirection: "column", minHeight: 0 }}>
@@ -142,6 +145,7 @@ export function PerfPane({
             msg={msg}
             color={color}
             dense
+            softUser={softUser}
             rowFlash={showFlash}
             flashIndex={showFlash ? i : undefined}
             footer={result && bubbleFooter ? bubbleFooter : undefined}

@@ -15,6 +15,8 @@ interface MsgBubbleProps {
   flashIndex?: number;
   /** Caption shown beneath the text (e.g. "← measured via DOM reflow"). */
   footer?: ReactNode;
+  /** Softer user-bubble tint (lighter background + thinner border). */
+  softUser?: boolean;
 }
 
 export function MsgBubble({
@@ -25,6 +27,7 @@ export function MsgBubble({
   rowFlash = false,
   flashIndex,
   footer,
+  softUser = false,
 }: MsgBubbleProps) {
   const isUser = msg.role === "user";
   const showFlash = flashIndex !== undefined;
@@ -50,11 +53,14 @@ export function MsgBubble({
               ? `${color}28`
               : `${color}14`
             : isUser
-              ? `${color}10`
+              ? softUser
+                ? `${color}08`
+                : `${color}10`
               : T.fill25,
           border: `1px solid ${
             isUser
-              ? color + (highlight ? "55" : dense ? "22" : "28")
+              ? color +
+                (highlight ? "55" : softUser ? "20" : dense ? "22" : "28")
               : T.fill6
           }`,
           transition: "background 0.3s, border 0.3s",

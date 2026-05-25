@@ -196,6 +196,7 @@ export function PerfTab({ messages, appWidth, L, R }: PerfTabProps) {
         }
         bubbleFooter="← height from Canvas math, no DOM needed"
         messages={messages}
+        softUser
       />
     </>
   );
