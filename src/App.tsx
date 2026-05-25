@@ -144,9 +144,13 @@ function runRealBenchmark(
   const tDom = performance.now() - t1;
   document.body.removeChild(domContainer);
 
+  // Pretext's pitch: prepare ONCE upfront, then layout is pure math on
+  // every container-width / re-render. Time only the layout phase to match
+  // what production code actually pays per reflow.
   clearPretextCache();
+  const prepared = messages.map((msg) => pretextPrepare(msg.text, FONT));
   const t2 = performance.now();
-  messages.forEach((msg) => pretextLayout(pretextPrepare(msg.text, FONT), bw));
+  for (const p of prepared) pretextLayout(p, bw);
   const tPretext = performance.now() - t2;
 
   return {
@@ -706,6 +710,7 @@ export default function App() {
   const [perfResult, setPerfResult] = useState<BenchmarkResult | null>(null);
   const [perfRunning, setPerfRunning] = useState(false);
   const [perfStep, setPerfStep] = useState("");
+  const [perfSize, setPerfSize] = useState(1000);
   const appRef = useRef<HTMLDivElement>(null);
   const [appWidth, setAppWidth] = useState(900);
   const [leftShifts, setLeftShifts] = useState(0);
@@ -731,17 +736,18 @@ export default function App() {
   const runPerf = useCallback(() => {
     setPerfRunning(true);
     setPerfResult(null);
-    setPerfStep("Rendering all messages into the page…");
+    setPerfStep(`Rendering ${perfSize} messages into the page…`);
     setTimeout(() => {
       setPerfStep("Measuring with DOM (triggering reflows)…");
       setTimeout(() => {
-        const result = runRealBenchmark(messages, appWidth / 2);
+        const benchMsgs = generateMessages(perfSize);
+        const result = runRealBenchmark(benchMsgs, appWidth / 2);
         setPerfResult(result);
         setPerfRunning(false);
         setPerfStep("");
       }, 80);
     }, 60);
-  }, [messages, appWidth]);
+  }, [perfSize, appWidth]);
 
   const L = "#ff6b6b";
   const R = "#00ff9d";
@@ -1527,6 +1533,39 @@ export default function App() {
                 borderRight: "1px solid rgba(255,255,255,0.07)",
               }}
             >
+              <div
+                style={{
+                  display: "flex",
+                  gap: 4,
+                  marginBottom: 8,
+                  width: 110,
+                  justifyContent: "center",
+                }}
+              >
+                {[100, 1000, 5000].map((n) => (
+                  <button
+                    key={n}
+                    onClick={() => setPerfSize(n)}
+                    disabled={perfRunning}
+                    style={{
+                      flex: 1,
+                      padding: "4px 0",
+                      fontSize: 12,
+                      fontFamily: "'IBM Plex Mono',monospace",
+                      background:
+                        perfSize === n
+                          ? "rgba(255,255,255,0.15)"
+                          : "rgba(255,255,255,0.04)",
+                      border: `1px solid ${perfSize === n ? "rgba(255,255,255,0.4)" : "rgba(255,255,255,0.1)"}`,
+                      borderRadius: 4,
+                      color: perfSize === n ? "#fff" : "#ffffff88",
+                      cursor: perfRunning ? "not-allowed" : "pointer",
+                    }}
+                  >
+                    {n >= 1000 ? `${n / 1000}k` : n}
+                  </button>
+                ))}
+              </div>
               <button
                 onClick={runPerf}
                 disabled={perfRunning}
@@ -1551,7 +1590,7 @@ export default function App() {
                 {perfRunning ? "⏳" : "▶ Run"}
                 <br />
                 <span style={{ fontSize: 13, opacity: 0.6 }}>
-                  {perfRunning ? perfStep : `${messages.length} messages`}
+                  {perfRunning ? perfStep : `${perfSize} messages`}
                 </span>
               </button>
               <div
