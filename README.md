@@ -2,7 +2,7 @@
 
 [![CI](https://github.com/leomacode/pretext-demo/actions/workflows/ci.yml/badge.svg)](https://github.com/leomacode/pretext-demo/actions/workflows/ci.yml)
 
-**[Live Demo](https://pretext-demo-a8bxsx6mn-leomacodes-projects.vercel.app/)**
+**[Live Demo](https://pretext-demo-five.vercel.app/)**
 
 A side-by-side interactive demo exploring [@chenglou/pretext](https://github.com/chenglou/pretext) — a new JS/TS library for DOM-free text measurement that went from 0 to 7,000 GitHub stars in days.
 
