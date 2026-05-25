@@ -27,13 +27,14 @@ Pretext solves this with a two-phase approach:
 
 ## Benchmark Results
 
-Measured in Chrome 132 on MacBook Pro M1 Pro. Times are median of 5 runs.
+Measured in Chrome on MacBook Pro. Pretext column times the layout phase only
+(prepare is amortized — that's the whole point of the two-phase API).
 
 | Messages | DOM measure | Pretext | Speedup |
 | -------: | ----------: | ------: | ------: |
-|      100 |        XX ms |    X ms |      Xx |
-|     1000 |       XXX ms |    X ms |     XXx |
-|     5000 |      XXXX ms |   XX ms |    XXXx |
+|      100 |      1.4 ms |  0.1 ms |     14× |
+|    1,000 |     11.9 ms |  0.3 ms |     40× |
+|    5,000 |     57.0 ms |  1.5 ms |     38× |
 
 ![Speed Test screenshot](./public/speed-test.png)
 
