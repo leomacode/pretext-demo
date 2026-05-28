@@ -1,0 +1,95 @@
+.chip {
+  /* was ${color}15 / ${color}33 */
+  background: color-mix(in srgb, var(--c) 8%, transparent);
+  border: 1px solid color-mix(in srgb, var(--c) 20%, transparent);
+  border-radius: 6px;
+  padding: 3px 10px;
+  font-family: var(--font-mono);
+  font-size: 15px;
+  color: var(--c);
+}
+
+.center {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding-top: 10px;
+  background: var(--surface);
+  border-right: 1px solid var(--line);
+}
+
+.btn {
+  width: 110px;
+  padding: 10px 0;
+  font-size: 15px;
+  font-family: var(--font-sans);
+  font-weight: 600;
+  background: var(--fill-8);
+  border: 1px solid var(--fill-20);
+  border-radius: 8px;
+  color: var(--text-88);
+  cursor: pointer;
+  text-align: center;
+  line-height: 1.5;
+  box-shadow: 0 0 12px rgba(255, 255, 255, 0.05);
+  transition: all 0.2s;
+}
+.btn:disabled {
+  background: var(--fill-1);
+  color: var(--text-77);
+  cursor: not-allowed;
+  box-shadow: none;
+}
+.btnSub {
+  font-size: 15px;
+  opacity: 0.6;
+}
+
+.method {
+  margin-top: 8px;
+  font-size: 15px;
+  color: var(--text-cc);
+  text-align: center;
+  font-family: var(--font-sans);
+  line-height: 1.5;
+  width: 90px;
+}
+
+.speedup {
+  margin-top: 16px;
+  padding: 10px 8px;
+  /* was rgba(0,255,157,0.06) / 0.2 — i.e. the R color at 6% / 20% */
+  background: color-mix(in srgb, var(--c) 6%, transparent);
+  border: 1px solid color-mix(in srgb, var(--c) 20%, transparent);
+  border-radius: 8px;
+  text-align: center;
+  animation: slideUp 0.4s ease;
+  width: 110px;
+}
+.speedupNum {
+  font-size: 20px;
+  font-weight: 700;
+  color: var(--c);
+  font-family: var(--font-mono);
+}
+.speedupLabel {
+  font-size: 15px;
+  color: var(--text-cc);
+  font-family: var(--font-sans);
+  margin-top: 2px;
+}
+
+/* Header status text */
+.cL {
+  color: var(--col-l);
+}
+.cR {
+  color: var(--col-r);
+}
+.dim {
+  color: var(--text-bb);
+  margin-left: 6px;
+}
+.ms {
+  font-size: 13px;
+}

@@ -1,0 +1,33 @@
+.shell {
+  display: flex;
+  flex-direction: column;
+  min-height: 0;
+}
+
+.shell[data-border-right="true"] {
+  border-right: 1px solid var(--line);
+}
+
+.header {
+  padding: 8px 14px;
+  /* was ${color}18 / ${color}05 */
+  border-bottom: 1px solid color-mix(in srgb, var(--c) 9%, transparent);
+  background: color-mix(in srgb, var(--c) 2%, transparent);
+  flex-shrink: 0;
+  min-height: 44px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.headerText {
+  font-size: 14px;
+  color: var(--text-bb);
+  font-family: var(--font-sans);
+}
+
+.body {
+  flex: 1;
+  overflow-y: auto;
+  padding-top: 6px;
+}

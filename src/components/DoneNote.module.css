@@ -1,0 +1,12 @@
+.note {
+  margin: 10px 12px;
+  padding: 10px 14px;
+  /* was ${color}0a / ${color}25 / ${color}99 — alpha hex → color-mix % */
+  background: color-mix(in srgb, var(--c) 4%, transparent);
+  border: 1px solid color-mix(in srgb, var(--c) 15%, transparent);
+  border-radius: 8px;
+  font-family: var(--font-sans);
+  font-size: 15px;
+  color: color-mix(in srgb, var(--c) 60%, transparent);
+  animation: slideUp 0.3s ease;
+}

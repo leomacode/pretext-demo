@@ -14,4 +14,8 @@ export interface BenchmarkResult {
 
 export type Phase = "idle" | "running" | "done";
 
-export const FONT = "15px 'IBM Plex Mono', monospace";
+// Single source of truth for the bubble text metrics. Both the rendered
+// bubbles (MsgBubble) and the height measurement (pretext/DOM via FONT) must
+// use the same size, or predicted heights won't match what's drawn.
+export const FONT_SIZE = 15;
+export const FONT = `${FONT_SIZE}px 'IBM Plex Mono', monospace`;

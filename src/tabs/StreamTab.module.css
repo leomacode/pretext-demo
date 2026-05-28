@@ -1,0 +1,105 @@
+.indicator {
+  margin-top: 10px;
+  display: flex;
+  align-items: flex-start;
+  gap: 8px;
+}
+.arrow {
+  font-size: 16px;
+  line-height: 1;
+  padding-top: 2px;
+  color: var(--c);
+}
+.arrow[data-bounce="true"] {
+  animation: bounceUp 0.6s ease infinite;
+}
+
+.card {
+  flex: 1;
+  padding: 8px 12px;
+  border-radius: 8px;
+  font-family: var(--font-sans);
+  transition: all 0.2s;
+}
+/* left, no jumps yet */
+.card[data-state="waiting"] {
+  background: var(--fill-1);
+  border: 1px solid var(--line);
+}
+/* left, after a jump — was ${L}10 / L+"40" */
+.card[data-state="jumped"] {
+  background: color-mix(in srgb, var(--c) 6%, transparent);
+  border: 1px solid color-mix(in srgb, var(--c) 25%, transparent);
+}
+/* right, zero jumps — was ${R}08 / ${R}30 */
+.card[data-state="zero"] {
+  background: color-mix(in srgb, var(--c) 3%, transparent);
+  border: 1px solid color-mix(in srgb, var(--c) 19%, transparent);
+}
+
+.waitText {
+  font-size: 15px;
+  color: var(--text-aa);
+}
+.bigNum {
+  font-size: 20px;
+  font-weight: 700;
+  color: var(--c);
+}
+.subText {
+  font-size: 14px;
+  color: var(--text-cc);
+  margin-top: 2px;
+}
+
+.btn {
+  width: 110px;
+  padding: 10px 8px;
+  font-size: 15px;
+  font-family: var(--font-sans);
+  font-weight: 600;
+  background: var(--fill-8);
+  border: 1px solid var(--fill-20);
+  border-radius: 8px;
+  color: var(--text-99);
+  cursor: pointer;
+  text-align: center;
+  line-height: 1.5;
+  transition: all 0.2s;
+}
+.btn:disabled {
+  background: var(--fill-4);
+  color: var(--text-aa);
+  cursor: not-allowed;
+}
+.btnSub {
+  font-size: 13px;
+  opacity: 0.6;
+}
+
+.caption {
+  margin-top: 8px;
+  font-size: 13px;
+  color: var(--text-55);
+  text-align: center;
+  font-family: var(--font-sans);
+  line-height: 1.5;
+  width: 90px;
+}
+
+.doneFooter {
+  margin-top: 8px;
+  padding: 8px 12px;
+  border-radius: 8px;
+  font-size: 15px;
+  font-family: var(--font-sans);
+  animation: slideUp 0.3s ease;
+  /* was ${color}0a / ${color}25 / color+"99" */
+  background: color-mix(in srgb, var(--c) 4%, transparent);
+  border: 1px solid color-mix(in srgb, var(--c) 15%, transparent);
+  color: color-mix(in srgb, var(--c) 60%, transparent);
+}
+.strong {
+  color: var(--c);
+  font-weight: 700;
+}

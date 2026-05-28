@@ -1,3 +1,39 @@
+:root {
+  /* Text greys on dark bg (low → high contrast) */
+  --text-55: #ffffff55;
+  --text-66: #ffffff66;
+  --text-77: #ffffff77;
+  --text-88: #ffffff88;
+  --text-99: #ffffff99;
+  --text-aa: #ffffffaa;
+  --text-bb: #ffffffbb;
+  --text-cc: #ffffffcc;
+  /* Panel backgrounds & borders */
+  --line: rgba(255, 255, 255, 0.07);
+  --line-5: rgba(255, 255, 255, 0.05);
+  --fill-1: rgba(255, 255, 255, 0.03);
+  --fill-25: rgba(255, 255, 255, 0.025);
+  --fill-4: rgba(255, 255, 255, 0.04);
+  --fill-5: rgba(255, 255, 255, 0.05);
+  --fill-6: rgba(255, 255, 255, 0.06);
+  --fill-8: rgba(255, 255, 255, 0.08);
+  --fill-10: rgba(255, 255, 255, 0.1);
+  --fill-15: rgba(255, 255, 255, 0.15);
+  --fill-20: rgba(255, 255, 255, 0.2);
+  --fill-40: rgba(255, 255, 255, 0.4);
+  --fill-70: rgba(255, 255, 255, 0.7);
+  --surface: rgba(0, 0, 0, 0.2);
+  /* App */
+  --bg-app: #07070e;
+  --bg-bar: rgba(0, 0, 0, 0.7);
+  /* Per-tab semantic colors */
+  --col-l: #ff6b6b; /* "without Pretext" (red) */
+  --col-r: #00ff9d; /* "with Pretext" (green) */
+  /* Fonts */
+  --font-mono: "IBM Plex Mono", monospace;
+  --font-sans: system-ui, sans-serif;
+}
+
 body {
   margin: 0;
   color-scheme: dark;

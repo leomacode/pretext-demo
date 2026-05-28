@@ -1,6 +1,6 @@
-import type { ReactNode } from "react";
+import type { CSSProperties, ReactNode } from "react";
+import s from "./StreamPane.module.css";
 import type { StreamState } from "../hooks/useStream";
-import { T } from "../theme";
 
 interface StreamPaneProps {
   color: string;
@@ -36,93 +36,36 @@ export function StreamPane({
   const visible = stream.text || stream.active;
 
   return (
-    <div style={{ display: "flex", flexDirection: "column", minHeight: 0 }}>
-      <div
-        style={{
-          padding: "10px 14px",
-          borderBottom: `1px solid ${color}15`,
-          flexShrink: 0,
-          minHeight: 44,
-          display: "flex",
-          alignItems: "center",
-        }}
-      >
-        <div
-          style={{
-            fontSize: 14,
-            color: T.textaa,
-            fontFamily: T.fontSans,
-          }}
-        >
-          {header}
-        </div>
+    <div className={s.pane} style={{ "--c": color } as CSSProperties}>
+      <div className={s.header}>
+        <div className={s.headerText}>{header}</div>
       </div>
-      <div style={{ flex: 1, padding: 14, overflowY: "auto" }}>
-        <div
-          style={{
-            fontSize: 15,
-            color: T.textaa,
-            marginBottom: 10,
-            lineHeight: 1.6,
-            fontFamily: T.fontSans,
-          }}
-        >
-          {intro}
-        </div>
+      <div className={s.body}>
+        <div className={s.intro}>{intro}</div>
         {visible && (
           <div>
             <div
-              style={{
-                borderRadius: "10px 10px 10px 2px",
-                padding: "8px 12px",
-                background: T.fill1,
-                border: reserveHeight ? `1px solid ${color}20` : `1px solid ${T.line}`,
-                ...(reserveHeight && stream.predictedH
+              className={s.bubble}
+              data-reserve={!!reserveHeight}
+              style={
+                reserveHeight && stream.predictedH
                   ? { minHeight: stream.predictedH }
-                  : {}),
-              }}
+                  : undefined
+              }
             >
-              <div
-                style={{
-                  fontSize: 15,
-                  color: reserveHeight ? color + "60" : T.text99,
-                  marginBottom: 4,
-                  fontFamily: T.fontSans,
-                }}
-              >
+              <div className={s.caption} data-reserve={!!reserveHeight}>
                 {bubbleCaption}
               </div>
-              <div
-                style={{
-                  fontSize: 15,
-                  lineHeight: "24px",
-                  color: "#a0a0b0",
-                  fontFamily: T.fontMono,
-                  whiteSpace: "pre-wrap",
-                  wordBreak: "break-word",
-                }}
-              >
+              <div className={s.text}>
                 {stream.text}
-                {stream.active && (
-                  <span style={{ animation: "blink 0.7s infinite" }}>▌</span>
-                )}
+                {stream.active && <span className={s.cursor}>▌</span>}
               </div>
             </div>
             {indicator}
             {stream.done && doneFooter}
           </div>
         )}
-        {!visible && (
-          <div
-            style={{
-              fontSize: 15,
-              color: T.text77,
-              fontFamily: T.fontSans,
-            }}
-          >
-            {emptyText}
-          </div>
-        )}
+        {!visible && <div className={s.empty}>{emptyText}</div>}
       </div>
     </div>
   );

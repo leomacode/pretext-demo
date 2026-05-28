@@ -1,0 +1,47 @@
+.header {
+  padding: 9px 14px;
+  /* was ${color}20 / ${color}07 */
+  border-bottom: 1px solid color-mix(in srgb, var(--c) 13%, transparent);
+  background: color-mix(in srgb, var(--c) 3%, transparent);
+  flex-shrink: 0;
+}
+
+.row {
+  display: flex;
+  align-items: center;
+  gap: 7px;
+}
+
+.dot {
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: var(--c);
+  box-shadow: 0 0 5px var(--c);
+}
+
+.label {
+  font-size: 14px;
+  font-weight: 700;
+  color: var(--c);
+  letter-spacing: 0.12em;
+  font-family: var(--font-mono);
+}
+
+.tag {
+  font-size: 15px;
+  padding: 1px 5px;
+  border-radius: 3px;
+  /* was ${color}18 / ${color}33 / ${color}bb */
+  background: color-mix(in srgb, var(--c) 9%, transparent);
+  border: 1px solid color-mix(in srgb, var(--c) 20%, transparent);
+  color: color-mix(in srgb, var(--c) 73%, transparent);
+  font-family: var(--font-mono);
+}
+
+.sub {
+  font-size: 15px;
+  color: var(--text-aa);
+  margin-top: 2px;
+  font-family: var(--font-sans);
+}
