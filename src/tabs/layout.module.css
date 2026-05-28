@@ -1,0 +1,7 @@
+/* Shared 3-column tab layout: left pane · center rail · right pane. */
+.grid {
+  height: 100%;
+  display: grid;
+  grid-template-columns: 1fr 130px 1fr;
+  min-height: 0;
+}

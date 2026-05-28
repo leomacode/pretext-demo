@@ -1,8 +1,9 @@
-import { useCallback, useState } from "react";
+import { useCallback, useState, type CSSProperties } from "react";
 import { CenterRail } from "../components/CenterRail";
 import { StreamPane } from "../components/StreamPane";
 import { useStream } from "../hooks/useStream";
-import { T } from "../theme";
+import grid from "./layout.module.css";
+import s from "./StreamTab.module.css";
 
 interface StreamTabProps {
   appWidth: number;
@@ -28,46 +29,17 @@ export function StreamTab({ appWidth, L, R }: StreamTabProps) {
 
   // Left-side indicator: animated arrow + page-jump counter card.
   const leftIndicator = (
-    <div
-      style={{
-        marginTop: 10,
-        display: "flex",
-        alignItems: "flex-start",
-        gap: 8,
-      }}
-    >
-      <div
-        style={{
-          fontSize: 16,
-          color: L,
-          animation: leftShifts > 0 ? "bounceUp 0.6s ease infinite" : "none",
-          lineHeight: 1,
-          paddingTop: 2,
-        }}
-      >
-        ↑
-      </div>
-      <div
-        style={{
-          flex: 1,
-          padding: "8px 12px",
-          background: leftShifts === 0 ? T.fill1 : `${L}10`,
-          border: `1px solid ${leftShifts === 0 ? T.line : L + "40"}`,
-          borderRadius: 8,
-          fontFamily: T.fontSans,
-          transition: "all 0.2s",
-        }}
-      >
+    <div className={s.indicator} style={{ "--c": L } as CSSProperties}>
+      <div className={s.arrow} data-bounce={leftShifts > 0} />
+      <div className={s.card} data-state={leftShifts === 0 ? "waiting" : "jumped"}>
         {leftShifts === 0 ? (
-          <div style={{ fontSize: 15, color: T.textaa }}>
-            Waiting for first jump…
-          </div>
+          <div className={s.waitText}>Waiting for first jump…</div>
         ) : (
           <>
-            <div style={{ fontSize: 20, fontWeight: 700, color: L }}>
+            <div className={s.bigNum}>
               {leftShifts} page jump{leftShifts !== 1 ? "s" : ""}
             </div>
-            <div style={{ fontSize: 14, color: T.textcc, marginTop: 2 }}>
+            <div className={s.subText}>
               Each time the bubble grew taller, everything on the page shifted.
             </div>
           </>
@@ -78,29 +50,11 @@ export function StreamTab({ appWidth, L, R }: StreamTabProps) {
 
   // Right-side indicator: static "Zero jumps" card.
   const rightIndicator = (
-    <div
-      style={{
-        marginTop: 10,
-        display: "flex",
-        alignItems: "flex-start",
-        gap: 8,
-      }}
-    >
-      <div style={{ fontSize: 16, color: R, lineHeight: 1, paddingTop: 2 }}>↑</div>
-      <div
-        style={{
-          flex: 1,
-          padding: "8px 12px",
-          background: `${R}08`,
-          border: `1px solid ${R}30`,
-          borderRadius: 8,
-          fontFamily: T.fontSans,
-        }}
-      >
-        <div style={{ fontSize: 20, fontWeight: 700, color: R }}>
-          Zero jumps 🔒
-        </div>
-        <div style={{ fontSize: 14, color: T.textcc, marginTop: 2 }}>
+    <div className={s.indicator} style={{ "--c": R } as CSSProperties}>
+      <div className={s.arrow} />
+      <div className={s.card} data-state="zero">
+        <div className={s.bigNum}>Zero jumps 🔒</div>
+        <div className={s.subText}>
           The space was calculated before streaming started. The page never
           moved.
         </div>
@@ -108,27 +62,8 @@ export function StreamTab({ appWidth, L, R }: StreamTabProps) {
     </div>
   );
 
-  const doneFooterStyle = (color: string) => ({
-    marginTop: 8,
-    padding: "8px 12px",
-    background: `${color}0a`,
-    border: `1px solid ${color}25`,
-    borderRadius: 8,
-    fontSize: 15,
-    color: color + "99",
-    fontFamily: T.fontSans,
-    animation: "slideUp 0.3s ease",
-  });
-
   return (
-    <div
-      style={{
-        height: "100%",
-        display: "grid",
-        gridTemplateColumns: "1fr 130px 1fr",
-        minHeight: 0,
-      }}
-    >
+    <div className={grid.grid}>
       <StreamPane
         color={L}
         header="No height prediction — bubble grows word by word."
@@ -137,9 +72,9 @@ export function StreamTab({ appWidth, L, R }: StreamTabProps) {
         bubbleCaption="AI · height changes on every new line"
         indicator={leftIndicator}
         doneFooter={
-          <div style={doneFooterStyle(L)}>
+          <div className={s.doneFooter} style={{ "--c": L } as CSSProperties}>
             Finished. The page jumped{" "}
-            <strong style={{ color: L }}>{leftShifts} times</strong> while that
+            <strong className={s.strong}>{leftShifts} times</strong> while that
             one message was typing.
           </div>
         }
@@ -147,42 +82,14 @@ export function StreamTab({ appWidth, L, R }: StreamTabProps) {
       />
 
       <CenterRail>
-        <button
-          onClick={streamBoth}
-          disabled={running}
-          style={{
-            width: 110,
-            padding: "10px 8px",
-            fontSize: 15,
-            fontFamily: T.fontSans,
-            fontWeight: 600,
-            background: running ? T.fill4 : T.fill8,
-            border: `1px solid ${T.fill20}`,
-            borderRadius: 8,
-            color: running ? T.textaa : T.text99,
-            cursor: running ? "not-allowed" : "pointer",
-            textAlign: "center",
-            lineHeight: 1.5,
-            transition: "all 0.2s",
-          }}
-        >
+        <button onClick={streamBoth} disabled={running} className={s.btn}>
           {running ? "●" : "▶ Stream both"}
           <br />
-          <span style={{ fontSize: 13, opacity: 0.6 }}>
+          <span className={s.btnSub}>
             {running ? "Streaming…" : "at the same time"}
           </span>
         </button>
-        <div
-          style={{
-            marginTop: 8,
-            fontSize: 13,
-            color: T.text55,
-            textAlign: "center",
-            fontFamily: T.fontSans,
-            lineHeight: 1.5,
-            width: 90,
-          }}
-        >
+        <div className={s.caption}>
           Same text,
           <br />
           same timing
@@ -195,13 +102,11 @@ export function StreamTab({ appWidth, L, R }: StreamTabProps) {
         intro="The full space is reserved before the first word arrives. Nothing below ever moves."
         stream={rightStream}
         reserveHeight
-        bubbleCaption={
-          <>AI · space reserved: {rightStream.predictedH}px 🔒</>
-        }
+        bubbleCaption={<>AI · space reserved: {rightStream.predictedH}px 🔒</>}
         indicator={rightIndicator}
         doneFooter={
-          <div style={doneFooterStyle(R)}>
-            Finished. <strong style={{ color: R }}>Zero page jumps.</strong>{" "}
+          <div className={s.doneFooter} style={{ "--c": R } as CSSProperties}>
+            Finished. <strong className={s.strong}>Zero page jumps.</strong>{" "}
             Pretext predicted the height before the first word arrived.
           </div>
         }

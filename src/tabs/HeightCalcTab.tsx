@@ -1,4 +1,10 @@
-import { useCallback, useEffect, useRef, useState } from "react";
+import {
+  useCallback,
+  useEffect,
+  useRef,
+  useState,
+  type CSSProperties,
+} from "react";
 import { DoneNote } from "../components/DoneNote";
 import { EmptyHint } from "../components/EmptyHint";
 import { MsgBubble } from "../components/MsgBubble";
@@ -9,7 +15,8 @@ import {
   pretextLayout,
   pretextPrepare,
 } from "../pretext";
-import { T } from "../theme";
+import grid from "./layout.module.css";
+import s from "./HeightCalcTab.module.css";
 import { FONT, type Message, type Phase } from "../types";
 
 interface HeightCalcTabProps {
@@ -20,17 +27,7 @@ interface HeightCalcTabProps {
 
 function Chip({ color, children }: { color: string; children: React.ReactNode }) {
   return (
-    <div
-      style={{
-        background: `${color}15`,
-        border: `1px solid ${color}33`,
-        borderRadius: 6,
-        padding: "3px 10px",
-        fontFamily: T.fontMono,
-        fontSize: 15,
-        color,
-      }}
-    >
+    <div className={s.chip} style={{ "--c": color } as CSSProperties}>
       {children}
     </div>
   );
@@ -43,6 +40,7 @@ export function HeightCalcTab({ messages, L, R }: HeightCalcTabProps) {
   const [rightMs, setRightMs] = useState<number | null>(null);
   const [panelWidth, setPanelWidth] = useState(400);
   const wrapperRef = useRef<HTMLDivElement>(null);
+  const revealTimer = useRef<ReturnType<typeof setInterval> | null>(null);
 
   useEffect(() => {
     if (!wrapperRef.current) return;
@@ -92,11 +90,12 @@ export function HeightCalcTab({ messages, L, R }: HeightCalcTabProps) {
     const leftTime = parseFloat((performance.now() - leftStart).toFixed(2));
 
     let i = 0;
-    const interval = setInterval(() => {
+    if (revealTimer.current) clearInterval(revealTimer.current);
+    revealTimer.current = setInterval(() => {
       i++;
       setLeftVisible((prev) => [...prev, i - 1]);
       if (i >= messages.length) {
-        clearInterval(interval);
+        if (revealTimer.current) clearInterval(revealTimer.current);
         setLeftMs(leftTime);
         setPhase("done");
       }
@@ -104,27 +103,35 @@ export function HeightCalcTab({ messages, L, R }: HeightCalcTabProps) {
   }, [phase, messages, panelWidth]);
 
   const reset = useCallback(() => {
+    if (revealTimer.current) clearInterval(revealTimer.current);
     setPhase("idle");
     setLeftVisible([]);
     setLeftMs(null);
     setRightMs(null);
   }, []);
 
+  // Clear the reveal interval on unmount so it can't fire setState after the
+  // component is gone (or leak if the tab tree is ever torn down mid-run).
+  useEffect(
+    () => () => {
+      if (revealTimer.current) clearInterval(revealTimer.current);
+    },
+    [],
+  );
+
   // Header content for the left (DOM) pane.
   const leftHeader = (
     <>
       {phase === "idle" && "Ready — press Load to start"}
       {phase === "running" && (
-        <span style={{ color: L }}>
+        <span className={s.cL}>
           ⏳ Measuring message {leftVisible.length} of {messages.length}…
-          <span style={{ color: T.textbb, marginLeft: 6 }}>
-            each one pauses the page
-          </span>
+          <span className={s.dim}>each one pauses the page</span>
         </span>
       )}
       {phase === "done" && leftMs !== null && (
         <span>
-          Took <strong style={{ color: L, fontSize: 13 }}>{leftMs}ms</strong> ·{" "}
+          Took <strong className={`${s.cL} ${s.ms}`}>{leftMs}ms</strong> ·{" "}
           {messages.length} page pauses
         </span>
       )}
@@ -136,33 +143,25 @@ export function HeightCalcTab({ messages, L, R }: HeightCalcTabProps) {
     <>
       {phase === "idle" && "Ready — Pretext will load instantly"}
       {phase === "running" && rightMs !== null && (
-        <span style={{ color: R }}>
-          ✅ Done in <strong style={{ fontSize: 13 }}>{rightMs}ms</strong> — all{" "}
+        <span className={s.cR}>
+          ✅ Done in <strong className={s.ms}>{rightMs}ms</strong> — all{" "}
           {messages.length} heights at once
         </span>
       )}
       {phase === "running" && rightMs === null && (
-        <span style={{ color: R }}>⚡ Calculating…</span>
+        <span className={s.cR}>⚡ Calculating…</span>
       )}
       {phase === "done" && rightMs !== null && (
         <span>
-          Took <strong style={{ color: R, fontSize: 13 }}>{rightMs}ms</strong> ·
-          zero page pauses
+          Took <strong className={`${s.cR} ${s.ms}`}>{rightMs}ms</strong> · zero
+          page pauses
         </span>
       )}
     </>
   );
 
   return (
-    <div
-      ref={wrapperRef}
-      style={{
-        height: "100%",
-        display: "grid",
-        gridTemplateColumns: "1fr 130px 1fr",
-        minHeight: 0,
-      }}
-    >
+    <div ref={wrapperRef} className={grid.grid}>
       {/* LEFT — DOM */}
       <PaneShell
         color={L}
@@ -183,7 +182,7 @@ export function HeightCalcTab({ messages, L, R }: HeightCalcTabProps) {
             each message one by one.
             <br />
             <br />
-            <span style={{ color: T.textaa }}>
+            <span style={{ color: "var(--text-aa)" }}>
               Press "Load" to see it happen.
             </span>
           </EmptyHint>
@@ -199,46 +198,22 @@ export function HeightCalcTab({ messages, L, R }: HeightCalcTabProps) {
         {phase === "done" && (
           <DoneNote color={L}>
             ✅ Done. The browser paused{" "}
-            <strong style={{ color: L }}>{messages.length} times</strong> —
-            once per message — before anything could be shown.
+            <strong style={{ color: L }}>{messages.length} times</strong> — once
+            per message — before anything could be shown.
           </DoneNote>
         )}
       </PaneShell>
 
       {/* CENTER */}
-      <div
-        style={{
-          display: "flex",
-          flexDirection: "column",
-          alignItems: "center",
-          paddingTop: 10,
-          background: T.surface,
-          borderRight: `1px solid ${T.line}`,
-        }}
-      >
+      <div className={s.center}>
         <button
           onClick={phase === "done" ? reset : handleLoad}
           disabled={phase === "running"}
-          style={{
-            width: 110,
-            padding: "10px 0",
-            fontSize: 15,
-            fontFamily: T.fontSans,
-            fontWeight: 600,
-            background: phase === "running" ? T.fill1 : T.fill8,
-            border: `1px solid ${T.fill20}`,
-            borderRadius: 8,
-            color: phase === "running" ? T.text77 : T.text88,
-            cursor: phase === "running" ? "not-allowed" : "pointer",
-            textAlign: "center",
-            lineHeight: 1.5,
-            boxShadow: phase === "running" ? "none" : "0 0 12px rgba(255,255,255,0.05)",
-            transition: "all 0.2s",
-          }}
+          className={s.btn}
         >
           {phase === "running" ? "⏳" : phase === "done" ? "↺ Reset" : "▶ Load"}
           <br />
-          <span style={{ fontSize: 15, opacity: 0.6 }}>
+          <span className={s.btnSub}>
             {phase === "running"
               ? "loading…"
               : phase === "done"
@@ -246,54 +221,17 @@ export function HeightCalcTab({ messages, L, R }: HeightCalcTabProps) {
                 : `${messages.length} messages`}
           </span>
         </button>
-        <div
-          style={{
-            marginTop: 8,
-            fontSize: 15,
-            color: T.textcc,
-            textAlign: "center",
-            fontFamily: T.fontSans,
-            lineHeight: 1.5,
-            width: 90,
-          }}
-        >
+        <div className={s.method}>
           Same messages,
           <br />
           different method
         </div>
         {phase === "done" && leftMs !== null && rightMs !== null && (
-          <div
-            style={{
-              marginTop: 16,
-              padding: "10px 8px",
-              background: "rgba(0,255,157,0.06)",
-              border: "1px solid rgba(0,255,157,0.2)",
-              borderRadius: 8,
-              textAlign: "center",
-              animation: "slideUp 0.4s ease",
-              width: 110,
-            }}
-          >
-            <div
-              style={{
-                fontSize: 20,
-                fontWeight: 700,
-                color: R,
-                fontFamily: T.fontMono,
-              }}
-            >
+          <div className={s.speedup} style={{ "--c": R } as CSSProperties}>
+            <div className={s.speedupNum}>
               {(leftMs / Math.max(rightMs, 0.01)).toFixed(0)}×
             </div>
-            <div
-              style={{
-                fontSize: 15,
-                color: T.textcc,
-                fontFamily: T.fontSans,
-                marginTop: 2,
-              }}
-            >
-              faster
-            </div>
+            <div className={s.speedupLabel}>faster</div>
           </div>
         )}
       </div>
@@ -317,7 +255,7 @@ export function HeightCalcTab({ messages, L, R }: HeightCalcTabProps) {
             then calculates every height with pure math.
             <br />
             <br />
-            <span style={{ color: T.textaa }}>
+            <span style={{ color: "var(--text-aa)" }}>
               All messages appear at the same moment.
             </span>
           </EmptyHint>

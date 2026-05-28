@@ -1,9 +1,10 @@
-import { useCallback, useState } from "react";
+import { useCallback, useState, type CSSProperties } from "react";
 import { runRealBenchmark } from "../benchmark";
 import { CenterRail } from "../components/CenterRail";
 import { PerfPane } from "../components/PerfPane";
 import { generateMessages } from "../data";
-import { T } from "../theme";
+import grid from "./layout.module.css";
+import s from "./PerfTab.module.css";
 import type { BenchmarkResult, Message } from "../types";
 
 interface PerfTabProps {
@@ -46,14 +47,7 @@ export function PerfTab({ messages, appWidth, L, R }: PerfTabProps) {
     : "100%";
 
   return (
-    <div
-      style={{
-        height: "100%",
-        display: "grid",
-        gridTemplateColumns: "1fr 130px 1fr",
-        minHeight: 0,
-      }}
-    >
+    <div className={grid.grid}>
       <PerfPane
         color={L}
         header={
@@ -66,20 +60,14 @@ export function PerfTab({ messages, appWidth, L, R }: PerfTabProps) {
         result={perfResult}
         value={perfResult?.dom}
         valueSuffix={
-          <div
-            style={{
-              fontSize: 15,
-              color: T.textcc,
-              fontFamily: T.fontSans,
-            }}
-          >
+          <div className={s.suffixText}>
             to measure {perfResult?.msgCount} messages
           </div>
         }
         statFooter={
           <>
             ⏱ {perMsgMs.toFixed(2)}ms per message ·{" "}
-            <span style={{ color: L }}>
+            <span className={s.warn} style={{ "--c": L } as CSSProperties}>
               ⚠️ Just {Math.max(1, Math.floor(16 / perMsgMs))} messages = already
               slow enough to feel laggy
             </span>
@@ -91,72 +79,27 @@ export function PerfTab({ messages, appWidth, L, R }: PerfTabProps) {
       />
 
       <CenterRail>
-        <div
-          style={{
-            display: "flex",
-            gap: 4,
-            marginBottom: 8,
-            width: 110,
-            justifyContent: "center",
-          }}
-        >
+        <div className={s.sizes}>
           {SIZES.map((n) => (
             <button
               key={n}
               onClick={() => setPerfSize(n)}
               disabled={perfRunning}
-              style={{
-                flex: 1,
-                padding: "4px 0",
-                fontSize: 12,
-                fontFamily: T.fontMono,
-                background: perfSize === n ? T.fill15 : T.fill4,
-                border: `1px solid ${perfSize === n ? T.fill40 : T.fill10}`,
-                borderRadius: 4,
-                color: perfSize === n ? "#fff" : T.text88,
-                cursor: perfRunning ? "not-allowed" : "pointer",
-              }}
+              className={s.sizeBtn}
+              data-active={perfSize === n}
             >
               {n >= 1000 ? `${n / 1000}k` : n}
             </button>
           ))}
         </div>
-        <button
-          onClick={runPerf}
-          disabled={perfRunning}
-          style={{
-            width: 110,
-            padding: "10px 0",
-            fontSize: 15,
-            fontFamily: T.fontSans,
-            fontWeight: 600,
-            background: perfRunning ? T.fill4 : T.fill8,
-            border: `1px solid ${T.fill20}`,
-            borderRadius: 8,
-            color: perfRunning ? T.textaa : T.text99,
-            cursor: perfRunning ? "not-allowed" : "pointer",
-            textAlign: "center",
-            lineHeight: 1.5,
-            transition: "all 0.2s",
-          }}
-        >
+        <button onClick={runPerf} disabled={perfRunning} className={s.runBtn}>
           {perfRunning ? "⏳" : "▶ Run"}
           <br />
-          <span style={{ fontSize: 13, opacity: 0.6 }}>
+          <span className={s.runSub}>
             {perfRunning ? perfStep : `${perfSize} messages`}
           </span>
         </button>
-        <div
-          style={{
-            marginTop: 8,
-            fontSize: 13,
-            color: T.text55,
-            textAlign: "center",
-            fontFamily: T.fontSans,
-            lineHeight: 1.5,
-            width: 90,
-          }}
-        >
+        <div className={s.caption}>
           Measures both
           <br />
           methods at once
@@ -176,18 +119,7 @@ export function PerfTab({ messages, appWidth, L, R }: PerfTabProps) {
         value={perfResult?.pretext}
         valueSuffix={
           perfResult && (
-            <div
-              style={{
-                padding: "2px 8px",
-                background: `${R}20`,
-                border: `1px solid ${R}40`,
-                borderRadius: 4,
-                fontSize: 14,
-                fontWeight: 700,
-                color: R,
-                fontFamily: T.fontSans,
-              }}
-            >
+            <div className={s.badge} style={{ "--c": R } as CSSProperties}>
               {perfResult.ratio}× faster
             </div>
           )

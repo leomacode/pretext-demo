@@ -1,0 +1,83 @@
+.sizes {
+  display: flex;
+  gap: 4px;
+  margin-bottom: 8px;
+  width: 110px;
+  justify-content: center;
+}
+.sizeBtn {
+  flex: 1;
+  padding: 4px 0;
+  font-size: 12px;
+  font-family: var(--font-mono);
+  background: var(--fill-4);
+  border: 1px solid var(--fill-10);
+  border-radius: 4px;
+  color: var(--text-88);
+  cursor: pointer;
+}
+.sizeBtn[data-active="true"] {
+  background: var(--fill-15);
+  border-color: var(--fill-40);
+  color: #fff;
+}
+.sizeBtn:disabled {
+  cursor: not-allowed;
+}
+
+.runBtn {
+  width: 110px;
+  padding: 10px 0;
+  font-size: 15px;
+  font-family: var(--font-sans);
+  font-weight: 600;
+  background: var(--fill-8);
+  border: 1px solid var(--fill-20);
+  border-radius: 8px;
+  color: var(--text-99);
+  cursor: pointer;
+  text-align: center;
+  line-height: 1.5;
+  transition: all 0.2s;
+}
+.runBtn:disabled {
+  background: var(--fill-4);
+  color: var(--text-aa);
+  cursor: not-allowed;
+}
+.runSub {
+  font-size: 13px;
+  opacity: 0.6;
+}
+
+.caption {
+  margin-top: 8px;
+  font-size: 13px;
+  color: var(--text-55);
+  text-align: center;
+  font-family: var(--font-sans);
+  line-height: 1.5;
+  width: 90px;
+}
+
+.suffixText {
+  font-size: 15px;
+  color: var(--text-cc);
+  font-family: var(--font-sans);
+}
+
+.badge {
+  padding: 2px 8px;
+  /* was ${R}20 / ${R}40 */
+  background: color-mix(in srgb, var(--c) 13%, transparent);
+  border: 1px solid color-mix(in srgb, var(--c) 25%, transparent);
+  border-radius: 4px;
+  font-size: 14px;
+  font-weight: 700;
+  color: var(--c);
+  font-family: var(--font-sans);
+}
+
+.warn {
+  color: var(--c);
+}

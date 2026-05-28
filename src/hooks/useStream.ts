@@ -44,7 +44,7 @@ export function useStream(
       if (!usePretext) {
         const bw2 = containerWidth * 0.82 - 24;
         const h = domMeasureHeight(partial, bw2, FONT);
-        const lines = Math.round((h - 16) / 20);
+        const lines = Math.round((h - 16) / 24);
         if (lines > prevLines.current) {
           onShiftRef.current?.();
           prevLines.current = lines;

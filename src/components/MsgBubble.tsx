@@ -1,6 +1,6 @@
-import type { ReactNode } from "react";
-import { T } from "../theme";
-import type { Message } from "../types";
+import type { CSSProperties, ReactNode } from "react";
+import s from "./MsgBubble.module.css";
+import { FONT_SIZE, type Message } from "../types";
 
 interface MsgBubbleProps {
   msg: Message;
@@ -19,6 +19,11 @@ interface MsgBubbleProps {
   softUser?: boolean;
 }
 
+// White fills that don't depend on the pane color (kept in JS so the
+// combinatorial bubble tint stays a single source of truth).
+const ASSISTANT_BG = "rgba(255,255,255,0.025)"; // was T.fill25
+const ASSISTANT_BD = "rgba(255,255,255,0.06)"; // was T.fill6
+
 export function MsgBubble({
   msg,
   color,
@@ -32,89 +37,60 @@ export function MsgBubble({
   const isUser = msg.role === "user";
   const showFlash = flashIndex !== undefined;
 
+  // Bubble tint is a function of (highlight, isUser, softUser, dense). Too
+  // combinatorial for class selectors — compute the two color strings here
+  // and hand them to CSS as custom properties.
+  const bubbleBg = highlight
+    ? isUser
+      ? `${color}28`
+      : `${color}14`
+    : isUser
+      ? softUser
+        ? `${color}08`
+        : `${color}10`
+      : ASSISTANT_BG;
+  const bubbleBd = isUser
+    ? color + (highlight ? "55" : softUser ? "20" : dense ? "22" : "28")
+    : ASSISTANT_BD;
+  const textColor = isUser ? "#d0ffd0" : dense ? "#909090" : "#a8a8b8";
+
+  const vars = {
+    "--c": color,
+    "--bubble-bg": bubbleBg,
+    "--bubble-bd": bubbleBd,
+    "--text-color": textColor,
+    "--font-size": `${FONT_SIZE}px`,
+  } as CSSProperties;
+
   return (
     <div
-      style={{
-        display: "flex",
-        justifyContent: isUser ? "flex-end" : "flex-start",
-        padding: "3px 12px",
-        animation: highlight ? "slideUp 0.15s ease" : "none",
-        background: rowFlash ? `${color}06` : "transparent",
-        transition: "background 0.3s",
-      }}
+      className={s.row}
+      data-user={isUser}
+      data-highlight={highlight}
+      data-flash={rowFlash}
+      style={vars}
     >
-      <div
-        style={{
-          maxWidth: "82%",
-          borderRadius: isUser ? "10px 10px 2px 10px" : "10px 10px 10px 2px",
-          padding: dense ? "5px 10px" : "6px 10px",
-          background: highlight
-            ? isUser
-              ? `${color}28`
-              : `${color}14`
-            : isUser
-              ? softUser
-                ? `${color}08`
-                : `${color}10`
-              : T.fill25,
-          border: `1px solid ${
-            isUser
-              ? color +
-                (highlight ? "55" : softUser ? "20" : dense ? "22" : "28")
-              : T.fill6
-          }`,
-          transition: "background 0.3s, border 0.3s",
-          position: "relative",
-        }}
-      >
+      <div className={s.bubble} data-user={isUser} data-dense={dense}>
         {showFlash && (
           <div
+            className={s.flash}
             style={{
-              position: "absolute",
-              inset: 0,
-              borderRadius: "inherit",
-              background: `${color}15`,
               animation: `benchFlash ${0.05 + (flashIndex % 5) * 0.02}s ease infinite alternate`,
             }}
           />
         )}
-        <div
-          style={{
-            fontSize: 15,
-            color: dense ? T.text77 : T.text99,
-            marginBottom: dense ? 2 : 3,
-            fontFamily: T.fontMono,
-          }}
-        >
+        <div className={s.meta} data-dense={dense}>
           {isUser ? "YOU" : "AI"} ·{" "}
           {msg.timestamp.toLocaleTimeString([], {
             hour: "2-digit",
             minute: "2-digit",
           })}
         </div>
-        <div
-          style={{
-            fontSize: 14,
-            lineHeight: dense ? "18px" : "24px",
-            color: isUser ? "#d0ffd0" : dense ? "#909090" : "#a8a8b8",
-            fontFamily: T.fontMono,
-            whiteSpace: "pre-wrap",
-            wordBreak: "break-word",
-          }}
-        >
+        <div className={s.text} data-dense={dense}>
           {msg.text}
         </div>
         {footer && (
-          <div
-            style={{
-              marginTop: 3,
-              fontSize: 15,
-              color: color + "66",
-              fontFamily: T.fontMono,
-            }}
-          >
-            {footer}
-          </div>
+          <div className={s.footer}>{footer}</div>
         )}
       </div>
     </div>

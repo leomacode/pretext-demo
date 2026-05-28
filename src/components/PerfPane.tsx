@@ -1,5 +1,6 @@
+import type { CSSProperties } from "react";
 import { MsgBubble } from "./MsgBubble";
-import { T } from "../theme";
+import s from "./PerfPane.module.css";
 import type { BenchmarkResult, Message } from "../types";
 
 interface PerfPaneProps {
@@ -37,108 +38,31 @@ export function PerfPane({
   softUser = false,
 }: PerfPaneProps) {
   return (
-    <div style={{ display: "flex", flexDirection: "column", minHeight: 0 }}>
-      {/* Header */}
-      <div
-        style={{
-          padding: "10px 14px",
-          borderBottom: `1px solid ${color}18`,
-          flexShrink: 0,
-          background: `${color}05`,
-          minHeight: 52,
-          display: "flex",
-          alignItems: "center",
-        }}
-      >
-        <div
-          style={{
-            fontSize: 14,
-            color: T.textaa,
-            fontFamily: T.fontSans,
-            lineHeight: 1.5,
-          }}
-        >
-          {header}
-        </div>
+    <div
+      className={s.pane}
+      style={{ "--c": color, "--bar-width": barWidth } as CSSProperties}
+    >
+      <div className={s.header}>
+        <div className={s.headerText}>{header}</div>
       </div>
 
-      {/* Stat card */}
       {result && value !== undefined && (
-        <div
-          style={{
-            padding: "10px 14px",
-            borderBottom: `1px solid ${color}18`,
-            background: `${color}0a`,
-            flexShrink: 0,
-            animation: "slideUp 0.3s ease",
-          }}
-        >
-          <div
-            style={{
-              display: "flex",
-              alignItems: "baseline",
-              gap: 8,
-              marginBottom: 4,
-            }}
-          >
-            <div
-              style={{
-                fontSize: 32,
-                fontWeight: 700,
-                color,
-                lineHeight: 1,
-              }}
-            >
+        <div className={s.stat}>
+          <div className={s.statTop}>
+            <div className={s.value}>
               {value}
-              <span
-                style={{
-                  fontSize: 15,
-                  fontWeight: 400,
-                  color: T.textcc,
-                  marginLeft: 3,
-                }}
-              >
-                ms
-              </span>
+              <span className={s.valueUnit}>ms</span>
             </div>
             {valueSuffix}
           </div>
-          <div
-            style={{
-              height: 4,
-              background: T.line5,
-              borderRadius: 2,
-              marginBottom: 6,
-            }}
-          >
-            <div
-              style={{
-                height: "100%",
-                width: barWidth,
-                background: color,
-                borderRadius: 2,
-                boxShadow: `0 0 8px ${color}`,
-                transition: "width 1.2s ease",
-              }}
-            />
+          <div className={s.bar}>
+            <div className={s.barFill} />
           </div>
-          {statFooter && (
-            <div
-              style={{
-                fontSize: 14,
-                color: T.textbb,
-                fontFamily: T.fontSans,
-                lineHeight: 1.7,
-              }}
-            >
-              {statFooter}
-            </div>
-          )}
+          {statFooter && <div className={s.statFooter}>{statFooter}</div>}
         </div>
       )}
 
-      {/* Bubble list */}
-      <div style={{ flex: 1, overflowY: "auto", padding: "8px 0" }}>
+      <div className={s.list}>
         {messages.map((msg, i) => (
           <MsgBubble
             key={msg.id}

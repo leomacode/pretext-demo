@@ -1,5 +1,5 @@
-import type { ReactNode } from "react";
-import { T } from "../theme";
+import type { CSSProperties, ReactNode } from "react";
+import s from "./PaneShell.module.css";
 
 interface PaneShellProps {
   color: string;
@@ -22,37 +22,15 @@ export function PaneShell({
 }: PaneShellProps) {
   return (
     <div
-      style={{
-        display: "flex",
-        flexDirection: "column",
-        minHeight: 0,
-        borderRight: borderRight ? `1px solid ${T.line}` : undefined,
-      }}
+      className={s.shell}
+      data-border-right={borderRight}
+      style={{ "--c": color } as CSSProperties}
     >
-      <div
-        style={{
-          padding: "8px 14px",
-          borderBottom: `1px solid ${color}18`,
-          background: `${color}05`,
-          flexShrink: 0,
-          minHeight: 44,
-          display: "flex",
-          alignItems: "center",
-          justifyContent: "space-between",
-        }}
-      >
-        <div
-          style={{
-            fontSize: 14,
-            color: T.textbb,
-            fontFamily: T.fontSans,
-          }}
-        >
-          {header}
-        </div>
+      <div className={s.header}>
+        <div className={s.headerText}>{header}</div>
         {chip}
       </div>
-      <div style={{ flex: 1, overflowY: "auto", paddingTop: 6 }}>{children}</div>
+      <div className={s.body}>{children}</div>
     </div>
   );
 }

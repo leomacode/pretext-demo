@@ -1,8 +1,4 @@
-import {
-  pretextPrepare,
-  pretextLayout,
-  clearPretextCache,
-} from "./pretext";
+import { pretextPrepare, pretextLayout, clearPretextCache } from "./pretext";
 import { FONT, type BenchmarkResult, type Message } from "./types";
 
 export function runRealBenchmark(
@@ -15,16 +11,23 @@ export function runRealBenchmark(
   domContainer.style.cssText = `position:fixed;top:-9999px;left:-9999px;width:${containerWidth}px;visibility:hidden;`;
   document.body.appendChild(domContainer);
 
-  const bubbles = messages.map((msg) => {
+  // Honest worst case: append each bubble, read its height, then remove it.
+  // Interleaving a layout-invalidating write with a read forces the browser
+  // to reflow once PER MESSAGE — the "browser pauses for every message" cost
+  // the demo dramatizes. Appending all-then-reading would batch into a single
+  // reflow and undercount. Removing each node keeps the container at one child
+  // so each reflow stays O(1) instead of O(n) — total O(n), not O(n²) (which
+  // froze the main thread and the flash animation at large N). Matches
+  // domMeasureHeight in HeightCalcTab.
+  const t1 = performance.now();
+  for (const msg of messages) {
     const d = document.createElement("div");
     d.style.cssText = `width:${bw}px;font:${FONT};padding:8px 12px;word-break:break-word;white-space:pre-wrap;box-sizing:border-box;line-height:24px;`;
     d.textContent = msg.text;
     domContainer.appendChild(d);
-    return d;
-  });
-
-  const t1 = performance.now();
-  bubbles.forEach((d) => d.getBoundingClientRect().height);
+    void d.getBoundingClientRect().height;
+    domContainer.removeChild(d);
+  }
   const tDom = performance.now() - t1;
   document.body.removeChild(domContainer);
 
