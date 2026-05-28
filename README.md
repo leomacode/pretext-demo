@@ -32,9 +32,9 @@ Measured in Chrome on MacBook Pro. Pretext column times the layout phase only
 
 | Messages | DOM measure | Pretext | Speedup |
 | -------: | ----------: | ------: | ------: |
-|      100 |      1.4 ms |  0.1 ms |     14× |
-|    1,000 |     11.9 ms |  0.3 ms |     40× |
-|    5,000 |     57.0 ms |  1.5 ms |     38× |
+|      100 |      3.9 ms |  0.1 ms |     39× |
+|    1,000 |     26.1 ms |  0.5 ms |     52× |
+|    5,000 |    121.1 ms |  2.3 ms |     53× |
 
 <img src="./public/speed-test.png" alt="Speed Test screenshot" loading="lazy" />
 
