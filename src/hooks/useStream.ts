@@ -3,6 +3,17 @@ import { pretextLayout, pretextPrepare, domMeasureHeight } from "../pretext";
 import { FONT } from "../types";
 import { STREAM_TEXT } from "../data";
 
+// Bubble box metrics — must match domMeasureHeight's CSS (8px top + 8px bottom
+// padding, 24px line-height). Used to turn a measured pixel height into a line
+// count so we can detect when streaming added a new line (= a layout shift).
+export const BUBBLE_PADDING_Y = 16;
+export const BUBBLE_LINE_HEIGHT = 24;
+
+/** Convert a measured bubble height (px) to its rendered line count. */
+export function heightToLineCount(height: number): number {
+  return Math.round((height - BUBBLE_PADDING_Y) / BUBBLE_LINE_HEIGHT);
+}
+
 export function useStream(
   containerWidth: number,
   usePretext: boolean,
@@ -44,7 +55,7 @@ export function useStream(
       if (!usePretext) {
         const bw2 = containerWidth * 0.82 - 24;
         const h = domMeasureHeight(partial, bw2, FONT);
-        const lines = Math.round((h - 16) / 24);
+        const lines = heightToLineCount(h);
         if (lines > prevLines.current) {
           onShiftRef.current?.();
           prevLines.current = lines;
