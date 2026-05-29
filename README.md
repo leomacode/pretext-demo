@@ -45,6 +45,38 @@ Measured in Chrome on MacBook Pro. Pretext column times the layout phase only
 - `Float32Array` for height storage — less GC pressure
 - `ResizeObserver` throttled with `requestAnimationFrame`
 
+## Architecture
+
+**One measurement surface.** `src/pretext.ts` wraps `@chenglou/pretext`
+(`prepare` / `layout` / `clearCache`) plus a `domMeasureHeight` DOM helper, so
+the whole app — and the tests — depend on a single stable boundary instead of
+the library directly.
+
+**The benchmark is the point, so it's measured honestly.** The two sides aren't
+timed the same way on purpose — each reflects what production actually pays:
+
+- _Pretext_ — `prepare()` runs once up front (amortized, as the two-phase API
+  intends); only the `layout()` phase is timed, because that's the per-reflow
+  cost a real app pays on every re-render.
+- _DOM_ — each bubble is appended, read via `getBoundingClientRect()`, then
+  removed. Interleaving a write with a read forces **one reflow per message** —
+  the real "browser pauses on every message" cost. Appending all-then-reading
+  would batch into a single reflow and undercount; reusing one growing
+  container would make it O(n²) and freeze the tab.
+
+**Height contract.** `layout()` returns the text height only; rendered bubbles
+add `8px` top/bottom padding. So a predicted height is always `layout() + 16` —
+encoded once in `useStream` and asserted by the browser cross-validation test.
+
+**Component shape.** Tab components own the state machines (`idle → running →
+done`); panes and bubbles are pure presentational components. The per-pane
+accent color flows down as a `--c` CSS custom property, so one set of CSS
+Module classes renders both the red ("without") and green ("with") columns.
+
+**Tests mirror the split.** Pure logic and state machines run fast in
+happy-dom; the one claim that needs a real layout engine — Pretext's math
+equalling the browser's — runs in headless Chromium (see [Testing](#testing)).
+
 ## Stack
 
 React 19 · TypeScript · Vite · Vitest · No UI libraries
