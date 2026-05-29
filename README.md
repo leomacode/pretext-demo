@@ -47,7 +47,7 @@ Measured in Chrome on MacBook Pro. Pretext column times the layout phase only
 
 ## Stack
 
-React 19 · TypeScript · Vite · No UI libraries
+React 19 · TypeScript · Vite · Vitest · No UI libraries
 
 ## Run locally
 
@@ -55,6 +55,18 @@ React 19 · TypeScript · Vite · No UI libraries
 npm install
 npm run dev
 ```
+
+## Testing
+
+```bash
+npm test          # watch mode
+npm test -- --run # single run (CI)
+```
+
+26 tests (Vitest + Testing Library) cover the layout math, the `useStream`
+state machine, and each tab's idle → running → done flow. A polyfilled
+`OffscreenCanvas` lets Pretext's Canvas measurement run in Node; the 5 DOM
+cross-validation cases skip outside a real browser (no layout engine).
 
 ## Why I built this
 
