@@ -59,14 +59,21 @@ npm run dev
 ## Testing
 
 ```bash
-npm test          # watch mode
-npm test -- --run # single run (CI)
+npm test           # unit project (happy-dom) — watch mode
+npm test -- --run  # unit project, single run
+npm run test:browser  # cross-validation in headless Chromium
+npm run test:all      # both projects
 ```
 
-26 tests (Vitest + Testing Library) cover the layout math, the `useStream`
-state machine, and each tab's idle → running → done flow. A polyfilled
-`OffscreenCanvas` lets Pretext's Canvas measurement run in Node; the 5 DOM
-cross-validation cases skip outside a real browser (no layout engine).
+29 tests across two Vitest projects:
+
+- **unit** (happy-dom) — the `useStream` state machine and each tab's
+  idle → running → done flow. A polyfilled `OffscreenCanvas` lets Pretext's
+  Canvas measurement run in Node.
+- **browser** (Playwright/Chromium) — cross-validates that Pretext's height
+  math matches the real browser layout engine within ±2px of
+  `getBoundingClientRect()`. This is the core correctness claim, so it runs
+  against an actual layout engine rather than skipping.
 
 ## Why I built this
 
