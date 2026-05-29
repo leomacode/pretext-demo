@@ -29,4 +29,7 @@ jobs:
       - run: npm run lint
       - run: npm run typecheck
       - run: npm test -- --run
+      # Cross-validate Pretext's math against a real browser layout engine.
+      - run: npx playwright install --with-deps chromium
+      - run: npm run test:browser -- --run
       - run: npm run build
