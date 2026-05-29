@@ -77,6 +77,9 @@ Module classes renders both the red ("without") and green ("with") columns.
 happy-dom; the one claim that needs a real layout engine — Pretext's math
 equalling the browser's — runs in headless Chromium (see [Testing](#testing)).
 
+For the reasoning and tradeoffs behind these choices — and what a production
+version would do differently at scale — see [docs/DESIGN.md](docs/DESIGN.md).
+
 ## Stack
 
 React 19 · TypeScript · Vite · Vitest · No UI libraries
