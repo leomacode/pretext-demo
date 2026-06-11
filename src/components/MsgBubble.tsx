@@ -1,4 +1,4 @@
-import type { CSSProperties, ReactNode } from "react";
+import { memo, useMemo, type CSSProperties, type ReactNode } from "react";
 import s from "./MsgBubble.module.css";
 import { FONT_SIZE, type Message } from "../types";
 
@@ -24,7 +24,9 @@ interface MsgBubbleProps {
 const ASSISTANT_BG = "rgba(255,255,255,0.025)"; // was T.fill25
 const ASSISTANT_BD = "rgba(255,255,255,0.06)"; // was T.fill6
 
-export function MsgBubble({
+// Memoized: bubble lists are large (120+ per pane) and parent tabs re-render
+// on fast timers (reveal/stream intervals), but each bubble's props are stable.
+export const MsgBubble = memo(function MsgBubble({
   msg,
   color,
   highlight = false,
@@ -36,6 +38,17 @@ export function MsgBubble({
 }: MsgBubbleProps) {
   const isUser = msg.role === "user";
   const showFlash = flashIndex !== undefined;
+
+  // Intl time formatting is comparatively expensive; the timestamp never
+  // changes, so cache the formatted string across flash/highlight re-renders.
+  const timeLabel = useMemo(
+    () =>
+      msg.timestamp.toLocaleTimeString([], {
+        hour: "2-digit",
+        minute: "2-digit",
+      }),
+    [msg.timestamp],
+  );
 
   // Bubble tint is a function of (highlight, isUser, softUser, dense). Too
   // combinatorial for class selectors — compute the two color strings here
@@ -80,11 +93,7 @@ export function MsgBubble({
           />
         )}
         <div className={s.meta} data-dense={dense}>
-          {isUser ? "YOU" : "AI"} ·{" "}
-          {msg.timestamp.toLocaleTimeString([], {
-            hour: "2-digit",
-            minute: "2-digit",
-          })}
+          {isUser ? "YOU" : "AI"} · {timeLabel}
         </div>
         <div className={s.text} data-dense={dense}>
           {msg.text}
@@ -95,4 +104,4 @@ export function MsgBubble({
       </div>
     </div>
   );
-}
+});

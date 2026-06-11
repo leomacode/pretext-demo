@@ -24,9 +24,18 @@ export default function App() {
 
   useEffect(() => {
     if (!appRef.current) return;
-    const ro = new ResizeObserver(([e]) => setAppWidth(e.contentRect.width));
+    let rafId: number;
+    // Coalesce resize bursts to one update per frame — all three tabs stay
+    // mounted, so each appWidth change re-renders the whole tree.
+    const ro = new ResizeObserver(([e]) => {
+      cancelAnimationFrame(rafId);
+      rafId = requestAnimationFrame(() => setAppWidth(e.contentRect.width));
+    });
     ro.observe(appRef.current);
-    return () => ro.disconnect();
+    return () => {
+      ro.disconnect();
+      cancelAnimationFrame(rafId);
+    };
   }, []);
 
   const { L, R } = T;

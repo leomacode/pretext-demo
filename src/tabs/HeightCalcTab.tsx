@@ -35,7 +35,9 @@ function Chip({ color, children }: { color: string; children: React.ReactNode })
 
 export function HeightCalcTab({ messages, L, R }: HeightCalcTabProps) {
   const [phase, setPhase] = useState<Phase>("idle");
-  const [leftVisible, setLeftVisible] = useState<number[]>([]);
+  // Reveal progress on the left pane — bubbles always appear in order, so a
+  // count is enough (no need to track an index array).
+  const [leftCount, setLeftCount] = useState(0);
   const [leftMs, setLeftMs] = useState<number | null>(null);
   const [rightMs, setRightMs] = useState<number | null>(null);
   const [panelWidth, setPanelWidth] = useState(400);
@@ -64,7 +66,7 @@ export function HeightCalcTab({ messages, L, R }: HeightCalcTabProps) {
   const handleLoad = useCallback(() => {
     if (phase === "running") return;
     setPhase("running");
-    setLeftVisible([]);
+    setLeftCount(0);
     setLeftMs(null);
     setRightMs(null);
 
@@ -93,7 +95,7 @@ export function HeightCalcTab({ messages, L, R }: HeightCalcTabProps) {
     if (revealTimer.current) clearInterval(revealTimer.current);
     revealTimer.current = setInterval(() => {
       i++;
-      setLeftVisible((prev) => [...prev, i - 1]);
+      setLeftCount(i);
       if (i >= messages.length) {
         if (revealTimer.current) clearInterval(revealTimer.current);
         setLeftMs(leftTime);
@@ -105,7 +107,7 @@ export function HeightCalcTab({ messages, L, R }: HeightCalcTabProps) {
   const reset = useCallback(() => {
     if (revealTimer.current) clearInterval(revealTimer.current);
     setPhase("idle");
-    setLeftVisible([]);
+    setLeftCount(0);
     setLeftMs(null);
     setRightMs(null);
   }, []);
@@ -125,7 +127,7 @@ export function HeightCalcTab({ messages, L, R }: HeightCalcTabProps) {
       {phase === "idle" && "Ready — press Load to start"}
       {phase === "running" && (
         <span className={s.cL}>
-          ⏳ Measuring message {leftVisible.length} of {messages.length}…
+          ⏳ Measuring message {leftCount} of {messages.length}…
           <span className={s.dim}>each one pauses the page</span>
         </span>
       )}
@@ -170,7 +172,7 @@ export function HeightCalcTab({ messages, L, R }: HeightCalcTabProps) {
         chip={
           phase !== "idle" && (
             <Chip color={L}>
-              {leftVisible.length} / {messages.length}
+              {leftCount} / {messages.length}
             </Chip>
           )
         }
@@ -187,12 +189,12 @@ export function HeightCalcTab({ messages, L, R }: HeightCalcTabProps) {
             </span>
           </EmptyHint>
         )}
-        {leftVisible.map((idx) => (
+        {messages.slice(0, leftCount).map((msg, idx) => (
           <MsgBubble
             key={idx}
-            msg={messages[idx]}
+            msg={msg}
             color={L}
-            highlight={idx === leftVisible.length - 1}
+            highlight={idx === leftCount - 1}
           />
         ))}
         {phase === "done" && (
