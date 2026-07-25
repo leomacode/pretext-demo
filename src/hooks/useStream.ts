@@ -29,10 +29,12 @@ export function useStream(
   // Keep onShift in a ref so its identity doesn't churn `start`'s deps.
   // Callers can pass an inline anonymous function each render without
   // forcing every consumer to wrap it in their own useCallback.
+  // No dep array on purpose: callers pass a fresh closure every render, so
+  // `[onShift]` would never match and the effect must run every commit anyway.
   const onShiftRef = useRef(onShift);
   useEffect(() => {
     onShiftRef.current = onShift;
-  }, [onShift]);
+  });
 
   const start = useCallback(() => {
     if (timer.current) clearInterval(timer.current);

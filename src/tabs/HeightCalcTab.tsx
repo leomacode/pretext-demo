@@ -40,27 +40,22 @@ export function HeightCalcTab({ messages, L, R }: HeightCalcTabProps) {
   const [leftCount, setLeftCount] = useState(0);
   const [leftMs, setLeftMs] = useState<number | null>(null);
   const [rightMs, setRightMs] = useState<number | null>(null);
-  const [panelWidth, setPanelWidth] = useState(400);
+  // Only read inside handleLoad, never rendered — a ref keeps the observer
+  // from re-rendering the whole pane on every resize frame.
+  const panelWidthRef = useRef(400);
   const wrapperRef = useRef<HTMLDivElement>(null);
   const revealTimer = useRef<ReturnType<typeof setInterval> | null>(null);
 
   useEffect(() => {
     if (!wrapperRef.current) return;
-    let rafId: number;
     const ro = new ResizeObserver(([e]) => {
-      cancelAnimationFrame(rafId);
-      rafId = requestAnimationFrame(() => {
-        // Ignore zero-width fires triggered when the tab is hidden via display:none.
-        if (e.contentRect.width > 0) {
-          setPanelWidth(e.contentRect.width / 2 - 1);
-        }
-      });
+      // Ignore zero-width fires triggered when the tab is hidden via display:none.
+      if (e.contentRect.width > 0) {
+        panelWidthRef.current = e.contentRect.width / 2 - 1;
+      }
     });
     ro.observe(wrapperRef.current);
-    return () => {
-      ro.disconnect();
-      cancelAnimationFrame(rafId);
-    };
+    return () => ro.disconnect();
   }, []);
 
   const handleLoad = useCallback(() => {
@@ -70,7 +65,7 @@ export function HeightCalcTab({ messages, L, R }: HeightCalcTabProps) {
     setLeftMs(null);
     setRightMs(null);
 
-    const bw = panelWidth * 0.82 - 24;
+    const bw = panelWidthRef.current * 0.82 - 24;
 
     // Pretext's pitch: prepare ONCE upfront, then layout is pure math on
     // every reflow. Time only the layout phase to match what production code
@@ -102,7 +97,7 @@ export function HeightCalcTab({ messages, L, R }: HeightCalcTabProps) {
         setPhase("done");
       }
     }, 35);
-  }, [phase, messages, panelWidth]);
+  }, [phase, messages]);
 
   const reset = useCallback(() => {
     if (revealTimer.current) clearInterval(revealTimer.current);
@@ -191,7 +186,7 @@ export function HeightCalcTab({ messages, L, R }: HeightCalcTabProps) {
         )}
         {messages.slice(0, leftCount).map((msg, idx) => (
           <MsgBubble
-            key={idx}
+            key={msg.id}
             msg={msg}
             color={L}
             highlight={idx === leftCount - 1}
@@ -209,6 +204,7 @@ export function HeightCalcTab({ messages, L, R }: HeightCalcTabProps) {
       {/* CENTER */}
       <div className={s.center}>
         <button
+          type="button"
           onClick={phase === "done" ? reset : handleLoad}
           disabled={phase === "running"}
           className={s.btn}
@@ -263,8 +259,8 @@ export function HeightCalcTab({ messages, L, R }: HeightCalcTabProps) {
           </EmptyHint>
         )}
         {phase !== "idle" &&
-          messages.map((msg, idx) => (
-            <MsgBubble key={idx} msg={msg} color={R} />
+          messages.map((msg) => (
+            <MsgBubble key={msg.id} msg={msg} color={R} />
           ))}
         {phase === "done" && (
           <DoneNote color={R}>

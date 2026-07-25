@@ -83,6 +83,7 @@ export function PerfTab({ messages, appWidth, L, R }: PerfTabProps) {
           {SIZES.map((n) => (
             <button
               key={n}
+              type="button"
               onClick={() => setPerfSize(n)}
               disabled={perfRunning}
               className={s.sizeBtn}
@@ -92,7 +93,12 @@ export function PerfTab({ messages, appWidth, L, R }: PerfTabProps) {
             </button>
           ))}
         </div>
-        <button onClick={runPerf} disabled={perfRunning} className={s.runBtn}>
+        <button
+          type="button"
+          onClick={runPerf}
+          disabled={perfRunning}
+          className={s.runBtn}
+        >
           {perfRunning ? "⏳" : "▶ Run"}
           <br />
           <span className={s.runSub}>

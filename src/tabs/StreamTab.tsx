@@ -82,7 +82,12 @@ export function StreamTab({ appWidth, L, R }: StreamTabProps) {
       />
 
       <CenterRail>
-        <button onClick={streamBoth} disabled={running} className={s.btn}>
+        <button
+          type="button"
+          onClick={streamBoth}
+          disabled={running}
+          className={s.btn}
+        >
           {running ? "●" : "▶ Stream both"}
           <br />
           <span className={s.btnSub}>
