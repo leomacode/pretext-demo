@@ -58,6 +58,7 @@ export default function App() {
           {TABS.map((t) => (
             <button
               key={t.id}
+              type="button"
               onClick={() => setTab(t.id)}
               className={s.tab}
               data-active={tab === t.id}
