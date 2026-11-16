@@ -1,28 +1,24 @@
-import { useCallback, useState, type CSSProperties } from "react";
+import { useCallback, useRef, useState, type CSSProperties } from "react";
 import { CenterRail } from "../components/CenterRail";
 import { StreamPane } from "../components/StreamPane";
 import { useStream } from "../hooks/useStream";
+import { L, R } from "../theme";
 import grid from "./layout.module.css";
 import s from "./StreamTab.module.css";
 
-interface StreamTabProps {
-  appWidth: number;
-  L: string;
-  R: string;
-}
-
-export function StreamTab({ appWidth, L, R }: StreamTabProps) {
+export function StreamTab() {
   const [leftShifts, setLeftShifts] = useState(0);
 
-  const leftStream = useStream(appWidth / 2, false, () =>
-    setLeftShifts((s) => s + 1),
-  );
-  const rightStream = useStream(appWidth / 2, true);
+  const leftStream = useStream(false, () => setLeftShifts((n) => n + 1));
+  const rightStream = useStream(true);
+  // Read pane widths at click time — no resize subscription needed.
+  const leftBox = useRef<HTMLDivElement>(null);
+  const rightBox = useRef<HTMLDivElement>(null);
 
   const streamBoth = useCallback(() => {
     setLeftShifts(0);
-    leftStream.start();
-    rightStream.start();
+    leftStream.start(leftBox.current?.clientWidth ?? 0);
+    rightStream.start(rightBox.current?.clientWidth ?? 0);
   }, [leftStream, rightStream]);
 
   const running = leftStream.active || rightStream.active;
@@ -69,6 +65,7 @@ export function StreamTab({ appWidth, L, R }: StreamTabProps) {
         header="No height prediction — bubble grows word by word."
         intro="The bubble grows word by word. Every new line pushes everything below it down."
         stream={leftStream}
+        boxRef={leftBox}
         bubbleCaption="AI · height changes on every new line"
         indicator={leftIndicator}
         doneFooter={
@@ -106,6 +103,7 @@ export function StreamTab({ appWidth, L, R }: StreamTabProps) {
         header="Pretext locks the height before streaming starts."
         intro="The full space is reserved before the first word arrives. Nothing below ever moves."
         stream={rightStream}
+        boxRef={rightBox}
         reserveHeight
         bubbleCaption={<>AI · space reserved: {rightStream.predictedH}px 🔒</>}
         indicator={rightIndicator}

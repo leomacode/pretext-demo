@@ -19,20 +19,20 @@ const TICK = 60; // matches the hook's setInterval cadence
 const FINISH_MS = (WORDS + 1) * TICK;
 
 describe("heightToLineCount — divisor must match the 24px line-height", () => {
-  it("maps padding-only height to zero lines", () => {
-    expect(heightToLineCount(16)).toBe(0);
+  it("maps empty text height to zero lines", () => {
+    expect(heightToLineCount(0)).toBe(0);
   });
 
-  it("counts one line per 24px above the 16px padding", () => {
-    expect(heightToLineCount(16 + 24)).toBe(1);
-    expect(heightToLineCount(16 + 24 * 5)).toBe(5);
-    expect(heightToLineCount(16 + 24 * 12)).toBe(12);
+  it("counts one line per 24px of text height", () => {
+    expect(heightToLineCount(24)).toBe(1);
+    expect(heightToLineCount(24 * 5)).toBe(5);
+    expect(heightToLineCount(24 * 12)).toBe(12);
   });
 
   it("does NOT divide by 20 (regression guard for the page-jump bug)", () => {
-    // With the old /20 divisor, a 5-line bubble (height 136) reported 6 lines.
-    expect(heightToLineCount(16 + 24 * 5)).not.toBe(Math.round((16 + 24 * 5 - 16) / 20));
-    expect(heightToLineCount(16 + 24 * 5)).toBe(5);
+    // With a /20 divisor, a 5-line text block (height 120) reported 6 lines.
+    expect(heightToLineCount(24 * 5)).not.toBe(Math.round((24 * 5) / 20));
+    expect(heightToLineCount(24 * 5)).toBe(5);
   });
 });
 
@@ -47,26 +47,26 @@ describe("useStream", () => {
   });
 
   it("starts idle with no text", () => {
-    const { result } = renderHook(() => useStream(800, false));
+    const { result } = renderHook(() => useStream(false));
     expect(result.current.text).toBe("");
     expect(result.current.active).toBe(false);
     expect(result.current.done).toBe(false);
   });
 
-  it("reserves a predicted height (layout + padding) only when usePretext", () => {
-    const withPretext = renderHook(() => useStream(800, true));
-    act(() => withPretext.result.current.start());
-    // pretextLayout mocked to 100, hook adds 16px padding.
-    expect(withPretext.result.current.predictedH).toBe(116);
+  it("reserves a predicted text height only when usePretext", () => {
+    const withPretext = renderHook(() => useStream(true));
+    act(() => withPretext.result.current.start(800));
+    // pretextLayout mocked to 100; reserved on the text box, no padding added.
+    expect(withPretext.result.current.predictedH).toBe(100);
 
-    const withoutPretext = renderHook(() => useStream(800, false));
-    act(() => withoutPretext.result.current.start());
+    const withoutPretext = renderHook(() => useStream(false));
+    act(() => withoutPretext.result.current.start(800));
     expect(withoutPretext.result.current.predictedH).toBeNull();
   });
 
   it("streams the full text word by word, then marks done", () => {
-    const { result } = renderHook(() => useStream(800, true));
-    act(() => result.current.start());
+    const { result } = renderHook(() => useStream(true));
+    act(() => result.current.start(800));
     expect(result.current.active).toBe(true);
     expect(result.current.done).toBe(false);
 
@@ -85,11 +85,11 @@ describe("useStream", () => {
     vi.mocked(domMeasureHeight).mockImplementation((text: string) => {
       const words = text === "" ? 0 : text.split(" ").length;
       const lines = Math.max(1, Math.ceil(words / 5));
-      return 16 + 24 * lines;
+      return 24 * lines;
     });
 
-    const { result } = renderHook(() => useStream(800, false, onShift));
-    act(() => result.current.start());
+    const { result } = renderHook(() => useStream(false, onShift));
+    act(() => result.current.start(800));
     act(() => vi.advanceTimersByTime(FINISH_MS));
 
     const expectedLines = Math.ceil(WORDS / 5);
@@ -98,15 +98,15 @@ describe("useStream", () => {
 
   it("does not fire onShift in pretext mode (height is pre-reserved)", () => {
     const onShift = vi.fn();
-    const { result } = renderHook(() => useStream(800, true, onShift));
-    act(() => result.current.start());
+    const { result } = renderHook(() => useStream(true, onShift));
+    act(() => result.current.start(800));
     act(() => vi.advanceTimersByTime(FINISH_MS));
     expect(onShift).not.toHaveBeenCalled();
   });
 
   it("stops the timer on unmount (no streaming after teardown)", () => {
-    const { result, unmount } = renderHook(() => useStream(800, true));
-    act(() => result.current.start());
+    const { result, unmount } = renderHook(() => useStream(true));
+    act(() => result.current.start(800));
     act(() => vi.advanceTimersByTime(TICK * 2));
     const midText = result.current.text;
     expect(midText).not.toBe(STREAM_TEXT);

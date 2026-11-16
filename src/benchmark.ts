@@ -1,49 +1,39 @@
-import { pretextPrepare, pretextLayout, clearPretextCache } from "./pretext";
+import { pretextPrepare, pretextLayout, clearPretextCache, domMeasureHeight } from "./pretext";
 import { FONT, type BenchmarkResult, type Message } from "./types";
 
+/**
+ * Time measuring every message's height both ways at `textWidth`. Shared by
+ * the Height Calculation and Speed Test tabs so their numbers are comparable.
+ */
 export function runRealBenchmark(
   messages: Message[],
-  containerWidth: number,
+  textWidth: number,
 ): BenchmarkResult {
-  const bw = Math.round(containerWidth * 0.82 - 24);
+  // Warm both paths once so neither number is dominated by first-call setup
+  // (JIT, style recalc of a cold document) at small N.
+  domMeasureHeight("warm-up", textWidth, FONT);
 
-  const domContainer = document.createElement("div");
-  domContainer.style.cssText = `position:fixed;top:-9999px;left:-9999px;width:${containerWidth}px;visibility:hidden;`;
-  document.body.appendChild(domContainer);
-
-  // Honest worst case: append each bubble, read its height, then remove it.
-  // Interleaving a layout-invalidating write with a read forces the browser
-  // to reflow once PER MESSAGE — the "browser pauses for every message" cost
-  // the demo dramatizes. Appending all-then-reading would batch into a single
-  // reflow and undercount. Removing each node keeps the container at one child
-  // so each reflow stays O(1) instead of O(n) — total O(n), not O(n²) (which
-  // froze the main thread and the flash animation at large N). Matches
-  // domMeasureHeight in HeightCalcTab.
+  // Honest worst case: one forced reflow PER message — the "browser pauses
+  // for every message" cost the demo dramatizes. Each probe is removed after
+  // reading, so each reflow stays O(1) and the total O(n), not O(n²).
   const t1 = performance.now();
-  for (const msg of messages) {
-    const d = document.createElement("div");
-    d.style.cssText = `width:${bw}px;font:${FONT};padding:8px 12px;word-break:break-word;white-space:pre-wrap;box-sizing:border-box;line-height:24px;`;
-    d.textContent = msg.text;
-    domContainer.appendChild(d);
-    void d.getBoundingClientRect().height;
-    domContainer.removeChild(d);
-  }
-  const tDom = performance.now() - t1;
-  document.body.removeChild(domContainer);
+  for (const msg of messages) domMeasureHeight(msg.text, textWidth, FONT);
+  const dom = performance.now() - t1;
 
-  // Pretext's pitch: prepare ONCE upfront, then layout is pure math on
-  // every container-width / re-render. Time only the layout phase to match
-  // what production code actually pays per reflow.
+  // Pretext's pitch: prepare ONCE upfront, then layout is pure math on every
+  // reflow. Time only the layout phase — what production code pays per
+  // re-render.
   clearPretextCache();
   const prepared = messages.map((msg) => pretextPrepare(msg.text, FONT));
+  for (const p of prepared) pretextLayout(p, textWidth);
   const t2 = performance.now();
-  for (const p of prepared) pretextLayout(p, bw);
-  const tPretext = performance.now() - t2;
+  for (const p of prepared) pretextLayout(p, textWidth);
+  const pretext = performance.now() - t2;
 
   return {
-    dom: tDom.toFixed(2),
-    pretext: tPretext.toFixed(2),
-    ratio: (tDom / Math.max(tPretext, 0.01)).toFixed(1),
+    dom,
+    pretext,
+    ratio: dom / Math.max(pretext, 0.01),
     msgCount: messages.length,
   };
 }

@@ -4,28 +4,28 @@ import {
   useRef,
   useState,
   type CSSProperties,
+  type ReactNode,
 } from "react";
+import { runRealBenchmark } from "../benchmark";
 import { DoneNote } from "../components/DoneNote";
 import { EmptyHint } from "../components/EmptyHint";
 import { MsgBubble } from "../components/MsgBubble";
 import { PaneShell } from "../components/PaneShell";
-import {
-  clearPretextCache,
-  domMeasureHeight,
-  pretextLayout,
-  pretextPrepare,
-} from "../pretext";
+import { L, R } from "../theme";
 import grid from "./layout.module.css";
 import s from "./HeightCalcTab.module.css";
-import { FONT, type Message, type Phase } from "../types";
+import {
+  bubbleTextWidth,
+  type BenchmarkResult,
+  type Message,
+  type Phase,
+} from "../types";
 
 interface HeightCalcTabProps {
   messages: Message[];
-  L: string;
-  R: string;
 }
 
-function Chip({ color, children }: { color: string; children: React.ReactNode }) {
+function Chip({ color, children }: { color: string; children: ReactNode }) {
   return (
     <div className={s.chip} style={{ "--c": color } as CSSProperties}>
       {children}
@@ -33,58 +33,24 @@ function Chip({ color, children }: { color: string; children: React.ReactNode })
   );
 }
 
-export function HeightCalcTab({ messages, L, R }: HeightCalcTabProps) {
+export function HeightCalcTab({ messages }: HeightCalcTabProps) {
   const [phase, setPhase] = useState<Phase>("idle");
   // Reveal progress on the left pane — bubbles always appear in order, so a
   // count is enough (no need to track an index array).
   const [leftCount, setLeftCount] = useState(0);
-  const [leftMs, setLeftMs] = useState<number | null>(null);
-  const [rightMs, setRightMs] = useState<number | null>(null);
-  // Only read inside handleLoad, never rendered — a ref keeps the observer
-  // from re-rendering the whole pane on every resize frame.
-  const panelWidthRef = useRef(400);
-  const wrapperRef = useRef<HTMLDivElement>(null);
+  const [result, setResult] = useState<BenchmarkResult | null>(null);
+  // Width is read once per Load from the left pane's list, so no resize
+  // subscription (and no re-render on resize).
+  const listRef = useRef<HTMLDivElement>(null);
   const revealTimer = useRef<ReturnType<typeof setInterval> | null>(null);
-
-  useEffect(() => {
-    if (!wrapperRef.current) return;
-    const ro = new ResizeObserver(([e]) => {
-      // Ignore zero-width fires triggered when the tab is hidden via display:none.
-      if (e.contentRect.width > 0) {
-        panelWidthRef.current = e.contentRect.width / 2 - 1;
-      }
-    });
-    ro.observe(wrapperRef.current);
-    return () => ro.disconnect();
-  }, []);
 
   const handleLoad = useCallback(() => {
     if (phase === "running") return;
+    // Same measurement as the Speed Test tab — one shared implementation.
+    const width = bubbleTextWidth(listRef.current?.clientWidth ?? 0);
+    setResult(runRealBenchmark(messages, width));
     setPhase("running");
     setLeftCount(0);
-    setLeftMs(null);
-    setRightMs(null);
-
-    const bw = panelWidthRef.current * 0.82 - 24;
-
-    // Pretext's pitch: prepare ONCE upfront, then layout is pure math on
-    // every reflow. Time only the layout phase to match what production code
-    // actually pays per re-render. Matches runRealBenchmark in Speed Test tab.
-    clearPretextCache();
-    const prepared = messages.map((msg) => pretextPrepare(msg.text, FONT));
-    // Warm-up pass: JIT-compile the layout call and prime CPU caches so the
-    // measurement isn't dominated by first-call setup at small N.
-    for (const p of prepared) pretextLayout(p, bw);
-    const t2 = performance.now();
-    for (const p of prepared) pretextLayout(p, bw);
-    const rightTime = parseFloat((performance.now() - t2).toFixed(2));
-    setRightMs(rightTime);
-
-    const leftStart = performance.now();
-    for (let i = 0; i < messages.length; i++) {
-      domMeasureHeight(messages[i].text, bw, FONT);
-    }
-    const leftTime = parseFloat((performance.now() - leftStart).toFixed(2));
 
     let i = 0;
     if (revealTimer.current) clearInterval(revealTimer.current);
@@ -93,7 +59,6 @@ export function HeightCalcTab({ messages, L, R }: HeightCalcTabProps) {
       setLeftCount(i);
       if (i >= messages.length) {
         if (revealTimer.current) clearInterval(revealTimer.current);
-        setLeftMs(leftTime);
         setPhase("done");
       }
     }, 35);
@@ -103,8 +68,7 @@ export function HeightCalcTab({ messages, L, R }: HeightCalcTabProps) {
     if (revealTimer.current) clearInterval(revealTimer.current);
     setPhase("idle");
     setLeftCount(0);
-    setLeftMs(null);
-    setRightMs(null);
+    setResult(null);
   }, []);
 
   // Clear the reveal interval on unmount so it can't fire setState after the
@@ -116,6 +80,9 @@ export function HeightCalcTab({ messages, L, R }: HeightCalcTabProps) {
     [],
   );
 
+  const leftMs = result?.dom.toFixed(2);
+  const rightMs = result?.pretext.toFixed(2);
+
   // Header content for the left (DOM) pane.
   const leftHeader = (
     <>
@@ -126,7 +93,7 @@ export function HeightCalcTab({ messages, L, R }: HeightCalcTabProps) {
           <span className={s.dim}>each one pauses the page</span>
         </span>
       )}
-      {phase === "done" && leftMs !== null && (
+      {phase === "done" && result && (
         <span>
           Took <strong className={`${s.cL} ${s.ms}`}>{leftMs}ms</strong> ·{" "}
           {messages.length} page pauses
@@ -139,16 +106,13 @@ export function HeightCalcTab({ messages, L, R }: HeightCalcTabProps) {
   const rightHeader = (
     <>
       {phase === "idle" && "Ready — Pretext will load instantly"}
-      {phase === "running" && rightMs !== null && (
+      {phase === "running" && result && (
         <span className={s.cR}>
           ✅ Done in <strong className={s.ms}>{rightMs}ms</strong> — all{" "}
           {messages.length} heights at once
         </span>
       )}
-      {phase === "running" && rightMs === null && (
-        <span className={s.cR}>⚡ Calculating…</span>
-      )}
-      {phase === "done" && rightMs !== null && (
+      {phase === "done" && result && (
         <span>
           Took <strong className={`${s.cR} ${s.ms}`}>{rightMs}ms</strong> · zero
           page pauses
@@ -158,11 +122,12 @@ export function HeightCalcTab({ messages, L, R }: HeightCalcTabProps) {
   );
 
   return (
-    <div ref={wrapperRef} className={grid.grid}>
+    <div className={grid.grid}>
       {/* LEFT — DOM */}
       <PaneShell
         color={L}
         borderRight
+        bodyRef={listRef}
         header={leftHeader}
         chip={
           phase !== "idle" && (
@@ -224,10 +189,10 @@ export function HeightCalcTab({ messages, L, R }: HeightCalcTabProps) {
           <br />
           different method
         </div>
-        {phase === "done" && leftMs !== null && rightMs !== null && (
+        {phase === "done" && result && (
           <div className={s.speedup} style={{ "--c": R } as CSSProperties}>
             <div className={s.speedupNum}>
-              {(leftMs / Math.max(rightMs, 0.01)).toFixed(0)}×
+              {result.ratio.toFixed(0)}×
             </div>
             <div className={s.speedupLabel}>faster</div>
           </div>

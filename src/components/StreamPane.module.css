@@ -5,18 +5,15 @@
 }
 
 .header {
+  composes: header from "./PaneShell.module.css";
   padding: 10px 14px;
-  /* was ${color}15 */
-  border-bottom: 1px solid color-mix(in srgb, var(--c) 8%, transparent);
-  flex-shrink: 0;
-  min-height: 44px;
-  display: flex;
-  align-items: center;
+  /* was ${color}15 — no tint fill on this pane */
+  border-bottom-color: color-mix(in srgb, var(--c) 8%, transparent);
+  background: none;
 }
 .headerText {
-  font-size: 14px;
+  composes: headerText from "./PaneShell.module.css";
   color: var(--text-aa);
-  font-family: var(--font-sans);
 }
 
 .body {

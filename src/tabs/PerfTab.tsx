@@ -1,49 +1,56 @@
-import { useCallback, useState, type CSSProperties } from "react";
+import {
+  useCallback,
+  useEffect,
+  useRef,
+  useState,
+  type CSSProperties,
+} from "react";
 import { runRealBenchmark } from "../benchmark";
 import { CenterRail } from "../components/CenterRail";
 import { PerfPane } from "../components/PerfPane";
 import { generateMessages } from "../data";
+import { L, R } from "../theme";
 import grid from "./layout.module.css";
 import s from "./PerfTab.module.css";
-import type { BenchmarkResult, Message } from "../types";
+import { bubbleTextWidth, type BenchmarkResult, type Message } from "../types";
 
 interface PerfTabProps {
   messages: Message[];
-  appWidth: number;
-  L: string;
-  R: string;
 }
 
 const SIZES = [100, 1000, 5000];
 
-export function PerfTab({ messages, appWidth, L, R }: PerfTabProps) {
+export function PerfTab({ messages }: PerfTabProps) {
   const [perfResult, setPerfResult] = useState<BenchmarkResult | null>(null);
   const [perfRunning, setPerfRunning] = useState(false);
   const [perfStep, setPerfStep] = useState("");
   const [perfSize, setPerfSize] = useState(1000);
+  const listRef = useRef<HTMLDivElement>(null);
+  const stepTimer = useRef<ReturnType<typeof setTimeout>>(undefined);
+
+  // Don't let a pending step fire setState after unmount.
+  useEffect(() => () => clearTimeout(stepTimer.current), []);
 
   const runPerf = useCallback(() => {
     setPerfRunning(true);
     setPerfResult(null);
     setPerfStep(`Rendering ${perfSize} messages into the page…`);
-    setTimeout(() => {
+    // Two short pauses so each step label paints before the blocking run.
+    stepTimer.current = setTimeout(() => {
       setPerfStep("Measuring with DOM (triggering reflows)…");
-      setTimeout(() => {
-        const benchMsgs = generateMessages(perfSize);
-        const result = runRealBenchmark(benchMsgs, appWidth / 2);
-        setPerfResult(result);
+      stepTimer.current = setTimeout(() => {
+        const width = bubbleTextWidth(listRef.current?.clientWidth ?? 0);
+        setPerfResult(runRealBenchmark(generateMessages(perfSize), width));
         setPerfRunning(false);
         setPerfStep("");
       }, 80);
     }, 60);
-  }, [perfSize, appWidth]);
+  }, [perfSize]);
 
-  const perMsgMs = perfResult
-    ? parseFloat(perfResult.dom) / perfResult.msgCount
-    : 0;
+  const perMsgMs = perfResult ? perfResult.dom / perfResult.msgCount : 0;
 
   const pretextBarWidth = perfResult
-    ? `${Math.min(100, (parseFloat(perfResult.pretext) / parseFloat(perfResult.dom)) * 100)}%`
+    ? `${Math.min(100, (perfResult.pretext / Math.max(perfResult.dom, 0.01)) * 100)}%`
     : "100%";
 
   return (
@@ -58,7 +65,7 @@ export function PerfTab({ messages, appWidth, L, R }: PerfTabProps) {
           </>
         }
         result={perfResult}
-        value={perfResult?.dom}
+        value={perfResult?.dom.toFixed(2)}
         valueSuffix={
           <div className={s.suffixText}>
             to measure {perfResult?.msgCount} messages
@@ -66,16 +73,22 @@ export function PerfTab({ messages, appWidth, L, R }: PerfTabProps) {
         }
         statFooter={
           <>
-            ⏱ {perMsgMs.toFixed(2)}ms per message ·{" "}
-            <span className={s.warn} style={{ "--c": L } as CSSProperties}>
-              ⚠️ Just {Math.max(1, Math.floor(16 / perMsgMs))} messages = already
-              slow enough to feel laggy
-            </span>
+            ⏱ {perMsgMs.toFixed(2)}ms per message
+            {perMsgMs > 0 && (
+              <>
+                {" · "}
+                <span className={s.warn} style={{ "--c": L } as CSSProperties}>
+                  ⚠️ Just {Math.max(1, Math.floor(16 / perMsgMs))} messages =
+                  already slow enough to feel laggy
+                </span>
+              </>
+            )}
           </>
         }
         bubbleFooter="← measured via DOM reflow"
         messages={messages}
         showFlash={perfRunning}
+        listRef={listRef}
       />
 
       <CenterRail>
@@ -122,11 +135,11 @@ export function PerfTab({ messages, appWidth, L, R }: PerfTabProps) {
           </>
         }
         result={perfResult}
-        value={perfResult?.pretext}
+        value={perfResult?.pretext.toFixed(2)}
         valueSuffix={
           perfResult && (
             <div className={s.badge} style={{ "--c": R } as CSSProperties}>
-              {perfResult.ratio}× faster
+              {perfResult.ratio.toFixed(1)}× faster
             </div>
           )
         }
@@ -134,7 +147,7 @@ export function PerfTab({ messages, appWidth, L, R }: PerfTabProps) {
         statFooter={
           perfResult && (
             <>
-              ✅ {perfResult.pretext}ms total · fits inside one 16ms screen
+              ✅ {perfResult.pretext.toFixed(2)}ms total · fits inside one 16ms screen
               refresh · zero page pauses
             </>
           )
