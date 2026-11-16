@@ -22,7 +22,7 @@ describe("HeightCalcTab phase machine", () => {
   afterEach(() => vi.useRealTimers());
 
   it("renders the idle state with a Load button and hints", () => {
-    render(<HeightCalcTab messages={messages} L="#ff6b6b" R="#00ff9d" />);
+    render(<HeightCalcTab messages={messages} />);
     expect(loadButton().textContent).toContain("Load");
     expect(loadButton().textContent).toContain("3 messages");
     expect(screen.getByText(/Press "Load" to see it happen/)).toBeTruthy();
@@ -30,14 +30,14 @@ describe("HeightCalcTab phase machine", () => {
   });
 
   it("disables the button and shows progress while running", () => {
-    render(<HeightCalcTab messages={messages} L="#ff6b6b" R="#00ff9d" />);
+    render(<HeightCalcTab messages={messages} />);
     fireEvent.click(loadButton());
     expect(loadButton().disabled).toBe(true);
     expect(loadButton().textContent).toContain("loading");
   });
 
   it("reaches done: shows Reset, a speedup card, and the zero-pauses note", () => {
-    render(<HeightCalcTab messages={messages} L="#ff6b6b" R="#00ff9d" />);
+    render(<HeightCalcTab messages={messages} />);
     fireEvent.click(loadButton());
     act(() => vi.advanceTimersByTime(FINISH_MS));
 
@@ -48,7 +48,7 @@ describe("HeightCalcTab phase machine", () => {
   });
 
   it("returns to idle when Reset is clicked", () => {
-    render(<HeightCalcTab messages={messages} L="#ff6b6b" R="#00ff9d" />);
+    render(<HeightCalcTab messages={messages} />);
     fireEvent.click(loadButton());
     act(() => vi.advanceTimersByTime(FINISH_MS));
     expect(loadButton().textContent).toContain("Reset");

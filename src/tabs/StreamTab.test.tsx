@@ -9,7 +9,7 @@ vi.mock("../pretext", () => ({
   pretextLayout: vi.fn(() => 100),
   domMeasureHeight: vi.fn((text: string) => {
     const words = text ? text.split(" ").length : 0;
-    return 16 + 24 * Math.max(1, Math.ceil(words / 8));
+    return 24 * Math.max(1, Math.ceil(words / 8));
   }),
 }));
 
@@ -28,21 +28,21 @@ describe("StreamTab", () => {
   afterEach(() => vi.useRealTimers());
 
   it("renders idle with a Stream button and placeholders", () => {
-    render(<StreamTab appWidth={800} L="#ff6b6b" R="#00ff9d" />);
+    render(<StreamTab />);
     expect(streamButton().textContent).toContain("Stream both");
     expect(screen.getByText(/Press the button in the middle to start/)).toBeTruthy();
     expect(screen.getByText("Waiting…")).toBeTruthy();
   });
 
   it("disables the button and shows streaming state on click", () => {
-    render(<StreamTab appWidth={800} L="#ff6b6b" R="#00ff9d" />);
+    render(<StreamTab />);
     fireEvent.click(streamButton());
     expect(streamButton().disabled).toBe(true);
     expect(streamButton().textContent).toContain("Streaming");
   });
 
   it("counts left-side page jumps and locks the right side at zero", () => {
-    render(<StreamTab appWidth={800} L="#ff6b6b" R="#00ff9d" />);
+    render(<StreamTab />);
     fireEvent.click(streamButton());
     act(() => vi.advanceTimersByTime(FINISH_MS));
 
@@ -56,9 +56,9 @@ describe("StreamTab", () => {
   });
 
   it("reserves a predicted height on the right (Pretext) bubble", () => {
-    render(<StreamTab appWidth={800} L="#ff6b6b" R="#00ff9d" />);
+    render(<StreamTab />);
     fireEvent.click(streamButton());
-    // pretextLayout mocked to 100, hook adds 16px → 116px reserved.
-    expect(screen.getByText(/space reserved: 116px/)).toBeTruthy();
+    // pretextLayout mocked to 100 → 100px of text height reserved.
+    expect(screen.getByText(/space reserved: 100px/)).toBeTruthy();
   });
 });

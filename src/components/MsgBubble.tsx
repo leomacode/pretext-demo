@@ -19,10 +19,13 @@ interface MsgBubbleProps {
   softUser?: boolean;
 }
 
-// White fills that don't depend on the pane color (kept in JS so the
-// combinatorial bubble tint stays a single source of truth).
-const ASSISTANT_BG = "rgba(255,255,255,0.025)"; // was T.fill25
-const ASSISTANT_BD = "rgba(255,255,255,0.06)"; // was T.fill6
+// White fills that don't depend on the pane color.
+const ASSISTANT_BG = "var(--fill-25)";
+const ASSISTANT_BD = "var(--fill-6)";
+
+/** Pane color at `pct`% opacity. `--c` is set on the row below. */
+const tint = (pct: number) =>
+  `color-mix(in srgb, var(--c) ${pct}%, transparent)`;
 
 // Memoized: bubble lists are large (120+ per pane) and parent tabs re-render
 // on fast timers (reveal/stream intervals), but each bubble's props are stable.
@@ -54,16 +57,12 @@ export const MsgBubble = memo(function MsgBubble({
   // combinatorial for class selectors — compute the two color strings here
   // and hand them to CSS as custom properties.
   const bubbleBg = highlight
-    ? isUser
-      ? `${color}28`
-      : `${color}14`
+    ? tint(isUser ? 16 : 8)
     : isUser
-      ? softUser
-        ? `${color}08`
-        : `${color}10`
+      ? tint(softUser ? 3 : 6)
       : ASSISTANT_BG;
   const bubbleBd = isUser
-    ? color + (highlight ? "55" : softUser ? "20" : dense ? "22" : "28")
+    ? tint(highlight ? 33 : softUser ? 13 : dense ? 13 : 16)
     : ASSISTANT_BD;
   const textColor = isUser ? "#d0ffd0" : dense ? "#909090" : "#a8a8b8";
 

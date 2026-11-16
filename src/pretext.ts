@@ -6,6 +6,7 @@ import {
   clearCache,
   type PreparedText as LibPreparedText,
 } from "@chenglou/pretext";
+import { LINE_HEIGHT } from "./types";
 
 export type PreparedText = LibPreparedText;
 
@@ -13,39 +14,45 @@ export function pretextPrepare(text: string, font: string): PreparedText {
   return prepare(text, font);
 }
 
+/** Pure text height (no padding) at the given text-content width. */
 export function pretextLayout(
   prepared: PreparedText,
-  containerWidth: number,
-  lineHeight = 24,
+  textWidth: number,
+  lineHeight = LINE_HEIGHT,
 ): number {
-  const { height } = pretextLibLayout(prepared, containerWidth, lineHeight);
+  const { height } = pretextLibLayout(prepared, textWidth, lineHeight);
   return Math.max(height, lineHeight);
 }
 
 // Convenience: prepare + layout in one call.
 export function layout(
   text: string,
-  containerWidth: number,
+  textWidth: number,
   font: string,
-  lineHeight = 24,
+  lineHeight = LINE_HEIGHT,
 ): number {
-  return pretextLayout(prepare(text, font), containerWidth, lineHeight);
+  return pretextLayout(prepare(text, font), textWidth, lineHeight);
 }
 
 export function clearPretextCache(): void {
   clearCache();
 }
 
+/**
+ * The "old way": render the text off-screen and read its height back. The
+ * append → read → remove sequence forces one synchronous reflow per call.
+ * Returns pure text height (no padding), comparable to pretextLayout.
+ */
 export function domMeasureHeight(
   text: string,
-  containerWidth: number,
+  textWidth: number,
   font: string,
 ): number {
   const div = document.createElement("div");
-  div.style.cssText = `position:fixed;visibility:hidden;top:-9999px;width:${containerWidth}px;font:${font};padding:8px 12px;word-break:break-word;white-space:pre-wrap;box-sizing:border-box;line-height:24px;`;
+  div.style.cssText = `position:fixed;visibility:hidden;top:-9999px;width:${textWidth}px;font:${font};line-height:${LINE_HEIGHT}px;white-space:pre-wrap;word-break:break-word;`;
   div.textContent = text;
   document.body.appendChild(div);
   const h = div.getBoundingClientRect().height;
-  document.body.removeChild(div);
+  div.remove();
   return h;
 }

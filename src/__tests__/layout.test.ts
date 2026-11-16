@@ -4,10 +4,6 @@ import { layout, domMeasureHeight } from "../pretext";
 const FONT = "16px sans-serif";
 const WIDTH = 400;
 const LINE_HEIGHT = 24;
-// domMeasureHeight renders with `padding: 8px 12px`, so its height includes
-// 16px of vertical padding that layout() (pure text height) does not. The app
-// accounts for this the same way (useStream adds 16 to the predicted height).
-const PADDING_Y = 16;
 
 // @chenglou/pretext needs a Canvas 2D context, which happy-dom doesn't
 // provide. Probe once; skip layout assertions when unavailable.
@@ -69,7 +65,8 @@ describe("layout(): Pretext height calculation", () => {
   it.skipIf(!canvasWorks || !domWorks).each(matchCases)(
     "matches DOM within ±2px for %s",
     (_label, text) => {
-      const pretextHeight = layout(text, WIDTH, FONT) + PADDING_Y;
+      // Both return pure text height (no padding) at the same text width.
+      const pretextHeight = layout(text, WIDTH, FONT);
       const domHeight = domMeasureHeight(text, WIDTH, FONT);
       expect(Math.abs(pretextHeight - domHeight)).toBeLessThanOrEqual(2);
     },

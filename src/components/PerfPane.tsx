@@ -1,20 +1,20 @@
-import type { CSSProperties } from "react";
+import type { CSSProperties, ReactNode, Ref } from "react";
 import { MsgBubble } from "./MsgBubble";
 import s from "./PerfPane.module.css";
 import type { BenchmarkResult, Message } from "../types";
 
 interface PerfPaneProps {
   color: string;
-  header: React.ReactNode;
+  header: ReactNode;
   result: BenchmarkResult | null;
   /** Big number (e.g. `result.dom`). */
   value?: string;
   /** Right of the big number — plain text label or a tinted badge. */
-  valueSuffix?: React.ReactNode;
+  valueSuffix?: ReactNode;
   /** Progress-bar fill width as percentage (e.g. "100%" or "12%"). */
   barWidth?: string;
   /** Footer line under the bar. */
-  statFooter?: React.ReactNode;
+  statFooter?: ReactNode;
   /** Footer line on each message bubble when a result exists. */
   bubbleFooter?: string;
   messages: Message[];
@@ -22,6 +22,8 @@ interface PerfPaneProps {
   showFlash?: boolean;
   /** Softer user-bubble tint (used by the Pretext side). */
   softUser?: boolean;
+  /** Scrollable bubble list — read its clientWidth to size measurements. */
+  listRef?: Ref<HTMLDivElement>;
 }
 
 export function PerfPane({
@@ -36,6 +38,7 @@ export function PerfPane({
   messages,
   showFlash = false,
   softUser = false,
+  listRef,
 }: PerfPaneProps) {
   return (
     <div
@@ -62,7 +65,7 @@ export function PerfPane({
         </div>
       )}
 
-      <div className={s.list}>
+      <div ref={listRef} className={s.list}>
         {messages.map((msg, i) => (
           <MsgBubble
             key={msg.id}

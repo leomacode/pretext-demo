@@ -1,11 +1,10 @@
-import { useEffect, useRef, useState, type CSSProperties } from "react";
+import { useState, type CSSProperties } from "react";
 import { ColHeader } from "./components/ColHeader";
-import { SCROLL_MESSAGES, generateMessages } from "./data";
+import { PERF_MESSAGES, SCROLL_MESSAGES } from "./data";
 import { HeightCalcTab } from "./tabs/HeightCalcTab";
 import { PerfTab } from "./tabs/PerfTab";
 import { StreamTab } from "./tabs/StreamTab";
-import { T } from "./theme";
-import type { Message } from "./types";
+import { L, R } from "./theme";
 import s from "./App.module.css";
 
 type TabId = "scroll" | "stream" | "perf";
@@ -18,30 +17,9 @@ const TABS: { id: TabId; label: string }[] = [
 
 export default function App() {
   const [tab, setTab] = useState<TabId>("scroll");
-  const [messages] = useState<Message[]>(() => generateMessages(80));
-  const appRef = useRef<HTMLDivElement>(null);
-  const [appWidth, setAppWidth] = useState(900);
-
-  useEffect(() => {
-    if (!appRef.current) return;
-    let rafId: number;
-    // Coalesce resize bursts to one update per frame — all three tabs stay
-    // mounted, so each appWidth change re-renders the whole tree.
-    const ro = new ResizeObserver(([e]) => {
-      cancelAnimationFrame(rafId);
-      rafId = requestAnimationFrame(() => setAppWidth(e.contentRect.width));
-    });
-    ro.observe(appRef.current);
-    return () => {
-      ro.disconnect();
-      cancelAnimationFrame(rafId);
-    };
-  }, []);
-
-  const { L, R } = T;
 
   return (
-    <div ref={appRef} className={s.app}>
+    <div className={s.app}>
       {/* TOP BAR */}
       <div className={s.bar}>
         <div className={s.brand}>
@@ -92,13 +70,13 @@ export default function App() {
           results, stream progress) persists across tab switches. */}
       <div className={s.panels}>
         <div className={s.panel} data-show={tab === "scroll"}>
-          <HeightCalcTab messages={SCROLL_MESSAGES} L={L} R={R} />
+          <HeightCalcTab messages={SCROLL_MESSAGES} />
         </div>
         <div className={s.panel} data-show={tab === "stream"}>
-          <StreamTab appWidth={appWidth} L={L} R={R} />
+          <StreamTab />
         </div>
         <div className={s.panel} data-show={tab === "perf"}>
-          <PerfTab messages={messages} appWidth={appWidth} L={L} R={R} />
+          <PerfTab messages={PERF_MESSAGES} />
         </div>
       </div>
     </div>

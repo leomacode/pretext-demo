@@ -5,19 +5,13 @@
 }
 
 .header {
+  composes: header from "./PaneShell.module.css";
   padding: 10px 14px;
-  /* was ${color}18 / ${color}05 */
-  border-bottom: 1px solid color-mix(in srgb, var(--c) 9%, transparent);
-  background: color-mix(in srgb, var(--c) 2%, transparent);
-  flex-shrink: 0;
   min-height: 52px;
-  display: flex;
-  align-items: center;
 }
 .headerText {
-  font-size: 14px;
+  composes: headerText from "./PaneShell.module.css";
   color: var(--text-aa);
-  font-family: var(--font-sans);
   line-height: 1.5;
 }
 

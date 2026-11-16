@@ -20,7 +20,7 @@ describe("PerfTab", () => {
   afterEach(() => vi.useRealTimers());
 
   it("renders idle: size selector and a Run button, no results yet", () => {
-    render(<PerfTab messages={messages} appWidth={800} L="#ff6b6b" R="#00ff9d" />);
+    render(<PerfTab messages={messages} />);
     expect(screen.getByRole("button", { name: "100" })).toBeTruthy();
     expect(screen.getByRole("button", { name: "5k" })).toBeTruthy();
     expect(screen.getByRole("button", { name: /Run/ }).textContent).toContain(
@@ -30,7 +30,7 @@ describe("PerfTab", () => {
   });
 
   it("reflects the selected size on the Run button", () => {
-    render(<PerfTab messages={messages} appWidth={800} L="#ff6b6b" R="#00ff9d" />);
+    render(<PerfTab messages={messages} />);
     fireEvent.click(screen.getByRole("button", { name: "100" }));
     expect(screen.getByRole("button", { name: /Run/ }).textContent).toContain(
       "100 messages",
@@ -38,7 +38,7 @@ describe("PerfTab", () => {
   });
 
   it("runs the benchmark and renders both result panes", () => {
-    render(<PerfTab messages={messages} appWidth={800} L="#ff6b6b" R="#00ff9d" />);
+    render(<PerfTab messages={messages} />);
     // Keep the run cheap.
     fireEvent.click(screen.getByRole("button", { name: "100" }));
     const runBtn = screen.getByRole("button", { name: /Run/ }) as HTMLButtonElement;

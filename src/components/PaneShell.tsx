@@ -1,4 +1,4 @@
-import type { CSSProperties, ReactNode } from "react";
+import type { CSSProperties, ReactNode, Ref } from "react";
 import s from "./PaneShell.module.css";
 
 interface PaneShellProps {
@@ -10,6 +10,8 @@ interface PaneShellProps {
   /** Optional progress chip on the right of the header bar. */
   chip?: ReactNode;
   children: ReactNode;
+  /** Scrollable body — read its clientWidth to size measurements. */
+  bodyRef?: Ref<HTMLDivElement>;
 }
 
 /** Column shell with a color-tinted header bar and a scrollable body. */
@@ -19,6 +21,7 @@ export function PaneShell({
   header,
   chip,
   children,
+  bodyRef,
 }: PaneShellProps) {
   return (
     <div
@@ -30,7 +33,7 @@ export function PaneShell({
         <div className={s.headerText}>{header}</div>
         {chip}
       </div>
-      <div className={s.body}>{children}</div>
+      <div ref={bodyRef} className={s.body}>{children}</div>
     </div>
   );
 }

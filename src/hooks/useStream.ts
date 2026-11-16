@@ -1,24 +1,19 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { pretextLayout, pretextPrepare, domMeasureHeight } from "../pretext";
-import { FONT } from "../types";
+import { FONT, LINE_HEIGHT } from "../types";
 import { STREAM_TEXT } from "../data";
 
-// Bubble box metrics — must match domMeasureHeight's CSS (8px top + 8px bottom
-// padding, 24px line-height). Used to turn a measured pixel height into a line
-// count so we can detect when streaming added a new line (= a layout shift).
-export const BUBBLE_PADDING_Y = 16;
-export const BUBBLE_LINE_HEIGHT = 24;
+const WORDS = STREAM_TEXT.split(" ");
 
-/** Convert a measured bubble height (px) to its rendered line count. */
+// StreamPane bubble: 12px padding each side + 1px border (StreamPane.module.css).
+const BUBBLE_CHROME_X = 26;
+
+/** Convert a measured text height (px, no padding) to its line count. */
 export function heightToLineCount(height: number): number {
-  return Math.round((height - BUBBLE_PADDING_Y) / BUBBLE_LINE_HEIGHT);
+  return Math.round(height / LINE_HEIGHT);
 }
 
-export function useStream(
-  containerWidth: number,
-  usePretext: boolean,
-  onShift?: () => void,
-) {
+export function useStream(usePretext: boolean, onShift?: () => void) {
   const [text, setText] = useState("");
   const [active, setActive] = useState(false);
   const [predictedH, setPredictedH] = useState<number | null>(null);
@@ -36,40 +31,40 @@ export function useStream(
     onShiftRef.current = onShift;
   });
 
-  const start = useCallback(() => {
+  /** `boxWidth`: the bubble's outer width, read by the caller at click time. */
+  const start = useCallback((boxWidth: number) => {
     if (timer.current) clearInterval(timer.current);
     prevLines.current = 0;
-    const bw = containerWidth * 0.82 - 24;
-    if (usePretext) {
-      setPredictedH(pretextLayout(pretextPrepare(STREAM_TEXT, FONT), bw) + 16);
-    } else {
-      setPredictedH(null);
-    }
+    const textWidth = Math.max(1, boxWidth - BUBBLE_CHROME_X);
+    setPredictedH(
+      usePretext
+        ? pretextLayout(pretextPrepare(STREAM_TEXT, FONT), textWidth)
+        : null,
+    );
     setText("");
     setActive(true);
     setDone(false);
-    const words = STREAM_TEXT.split(" ");
     let i = 0;
     timer.current = setInterval(() => {
       i++;
-      const partial = words.slice(0, i).join(" ");
+      const partial = WORDS.slice(0, i).join(" ");
       setText(partial);
       if (!usePretext) {
-        const bw2 = containerWidth * 0.82 - 24;
-        const h = domMeasureHeight(partial, bw2, FONT);
-        const lines = heightToLineCount(h);
+        const lines = heightToLineCount(
+          domMeasureHeight(partial, textWidth, FONT),
+        );
         if (lines > prevLines.current) {
           onShiftRef.current?.();
           prevLines.current = lines;
         }
       }
-      if (i >= words.length) {
+      if (i >= WORDS.length) {
         if (timer.current) clearInterval(timer.current);
         setActive(false);
         setDone(true);
       }
     }, 60);
-  }, [containerWidth, usePretext]);
+  }, [usePretext]);
 
   useEffect(
     () => () => {
